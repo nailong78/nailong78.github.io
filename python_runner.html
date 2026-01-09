@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python 终端</title>
+    <title>Python 终端 - Nailong78</title>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
     <style>
         :root { --bg: #050505; --text: #fff; --card: rgba(255,255,255,0.08); }
         body.light-mode { --bg: #f2f4f6; --text: #1a1a1a; --card: #fff; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; transition: 0.5s; }
-        .glass { background: var(--card); backdrop-filter: blur(20px); border-radius: 24px; padding: 25px; border: 1px solid rgba(128,128,128,0.2); margin-top: 20px;}
-        pre { color: #30d158; font-family: "SF Mono", monospace; font-size: 14px; overflow-x: auto; }
-        .back { color: var(--text); text-decoration: none; font-weight: 600; opacity: 0.6; }
+        body { font-family: "SF Mono", monospace; background: var(--bg); color: var(--text); padding: 20px; transition: 0.5s; }
+        .glass { background: var(--card); backdrop-filter: blur(20px); border-radius: 24px; padding: 25px; border: 1px solid rgba(128,128,128,0.2); min-height: 300px; }
+        pre { color: #30d158; font-size: 14px; white-space: pre-wrap; word-wrap: break-word; }
+        .back { color: var(--text); text-decoration: none; font-weight: 600; opacity: 0.6; display: block; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <a href="index.html" class="back">← 退出运行</a>
     <div class="glass">
-        <h3 id="name" style="margin-bottom: 15px;">环境准备中...</h3>
-        <pre id="output">Python VM 启动中...</pre>
+        <h3 id="name" style="margin-bottom: 15px; font-family: sans-serif;">终端初始化...</h3>
+        <pre id="output">正在启动云端 Python VM...</pre>
     </div>
     <script>
         function applyTheme() {
@@ -31,14 +31,23 @@
         async function run() {
             const params = new URLSearchParams(window.location.search);
             const file = params.get('file');
-            document.getElementById('name').innerText = "运行应用: " + file.split('.')[0];
+            document.getElementById('name').innerText = "Terminal: " + file.split('.')[0];
+            
             let pyodide = await loadPyodide();
+            // 加载 micropip 用于安装依赖
+            await pyodide.loadPackage("micropip");
+            
+            const output = document.getElementById('output');
             const code = await fetch(`apps/${file}`).then(res => res.text());
+            
+            // 重定向 Python 的 print 到网页 pre 标签
+            pyodide.setStdout({ batched: (str) => { output.innerText += str + "\n"; } });
+
             try {
-                let out = await pyodide.runPython(code);
-                document.getElementById('output').innerText = out || ">>> 执行完成 (无返回输出)";
+                output.innerText = ""; // 清空加载提示
+                await pyodide.runPythonAsync(code);
             } catch (err) {
-                document.getElementById('output').innerText = "错误:\n" + err;
+                output.innerText += "\n[Runtime Error]\n" + err;
             }
         }
         run();
