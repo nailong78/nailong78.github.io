@@ -143,10 +143,9 @@
                 <a href="https://t.me/NL78991" target="_blank" class="social-item">✈️</a>
             </div>
             
-            <div class="glass-card" style="text-align:left; margin-top:20px;" onclick="showLogs(event, this)">
+            <div class="glass-card" style="text-align:left; margin-top:20px;" onclick="initLogUI(event, this)">
                 <h3 style="font-size:16px;">📜 更新日志</h3>
                 <p style="font-size:11px; opacity:0.5; margin-top:4px;">查看 GitHub Actions 自动更新记录</p>
-                <div class="ripple-container"></div>
             </div>
 
             <div class="glass-card" style="text-align:left; margin-top:12px; cursor:default;">
@@ -186,8 +185,8 @@
 
 <script>
     const user = "nailong78", repo = "nailong78.github.io";
+    let logPage = 1, isLogLoading = false, hasMoreLogs = true, currentLogTitle = "";
 
-    // 视差滚动
     window.addEventListener('scroll', () => {
         const scrolled = window.pageYOffset;
         requestAnimationFrame(() => {
@@ -195,7 +194,6 @@
         });
     });
 
-    // 涟漪动效
     const createRipple = (event, element) => {
         const ripple = document.createElement("span");
         ripple.classList.add("ripple");
@@ -208,43 +206,60 @@
         setTimeout(() => ripple.remove(), 600);
     };
 
-    // 智能提取 Actions 更新日志
-    const showLogs = async (e, el) => {
+    // 初始化日志 UI
+    const initLogUI = (e, el) => {
         createRipple(e, el);
-        openWin('更新日志', '正在从 GitHub 获取最新的自动化构建记录...', false);
+        logPage = 1; hasMoreLogs = true; currentLogTitle = "更新日志";
+        openWin(currentLogTitle, '<div id="log-content">正在同步记录...</div>', false);
+        fetchMoreLogs();
+    };
+
+    // 分页加载核心逻辑
+    const fetchMoreLogs = async () => {
+        if (isLogLoading || !hasMoreLogs) return;
+        isLogLoading = true;
+        const container = document.getElementById('log-content');
+        if (logPage > 1) {
+            const loader = document.createElement('div');
+            loader.id = "log-loader";
+            loader.style.cssText = "text-align:center; padding:20px; opacity:0.5; font-size:12px;";
+            loader.innerText = "正在加载更多历史...";
+            container.appendChild(loader);
+        }
+
         try {
-            const res = await fetch(`https://api.github.com/repos/${user}/${repo}/actions/runs?per_page=10`);
+            const res = await fetch(`https://api.github.com/repos/${user}/${repo}/actions/runs?per_page=10&page=${logPage}`);
             const data = await res.json();
-            let logMD = "";
-            data.workflow_runs.forEach((run, index) => {
+            const runs = data.workflow_runs;
+
+            if (runs.length < 10) hasMoreLogs = false;
+            
+            let html = "";
+            runs.forEach((run, index) => {
+                const count = (logPage - 1) * 10 + index + 1;
                 const time = new Date(run.created_at).toLocaleString('zh-CN');
-                // 简单的关键词翻译逻辑
                 let msg = run.head_commit.message
-                    .replace(/Update/g, '更新')
-                    .replace(/Add/g, '新增')
-                    .replace(/Fix/g, '修复')
-                    .replace(/Delete/g, '删除')
-                    .replace(/workflow/g, '自动化流');
-                logMD += `**${index + 1}.** {gray:${time}}\n> ${msg}\n\n`;
+                    .replace(/Update/g, '更新').replace(/Add/g, '新增')
+                    .replace(/Fix/g, '修复').replace(/Delete/g, '删除');
+                html += `<div style="margin-bottom:15px;"><strong>${count}.</strong> <span style="opacity:0.4; font-size:12px;">${time}</span><br><span style="padding-left:15px; display:block; opacity:0.8;">> ${msg}</span></div>`;
             });
-            openWin('更新日志', logMD || "暂无记录");
+
+            const loader = document.getElementById('log-loader');
+            if (loader) loader.remove();
+            
+            if (logPage === 1) container.innerHTML = html;
+            else container.insertAdjacentHTML('beforeend', html);
+            
+            logPage++;
         } catch (err) {
-            openWin('更新日志', '获取失败，请检查网络连接。');
+            if (logPage === 1) container.innerText = "同步失败，请重试";
+        } finally {
+            isLogLoading = false;
         }
     };
 
     const parseContent = (text) => {
-        const urlRegex = /(https?:\/\/[^\s]+|data:image\/[a-zA-Z]+;base64,[^\s]+)/gi;
-        let html = text.replace(urlRegex, (match) => {
-            if (/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(match) || match.startsWith('data:image')) {
-                return `<img src="${match}" loading="lazy">`;
-            }
-            return `<a href="${match}" target="_blank" style="color:var(--accent);">访问链接</a>`;
-        });
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                   .replace(/\{gray:(.*?)\}/g, '<span style="opacity:0.4;font-size:12px;">$1</span>')
-                   .replace(/\n/g, '<br>');
-        return html;
+        return text.replace(/\n/g, '<br>');
     };
 
     const updateRuntime = () => {
@@ -257,6 +272,12 @@
     const onWinScroll = () => {
         const body = document.getElementById('win-body'), progress = document.getElementById('read-progress'), btt = document.getElementById('back-to-top'), modal = document.getElementById('win-modal');
         if (body.scrollHeight > body.clientHeight) progress.style.width = (body.scrollTop / (body.scrollHeight - body.clientHeight)) * 100 + '%';
+        
+        // 触发分页加载
+        if (document.getElementById('log-content') && body.scrollTop + body.clientHeight >= body.scrollHeight - 50) {
+            fetchMoreLogs();
+        }
+
         if(modal.classList.contains('full') && body.scrollTop > 200) { btt.style.display = 'flex'; setTimeout(() => btt.classList.add('show'), 10); } 
         else { btt.classList.remove('show'); setTimeout(() => { if(!btt.classList.contains('show')) btt.style.display = 'none'; }, 300); }
     };
@@ -268,7 +289,7 @@
         const m = document.getElementById('win-mask'), b = document.getElementById('win-body'), modal = document.getElementById('win-modal');
         document.getElementById('win-title').innerText = title; modal.classList.remove('full');
         document.getElementById('read-progress').style.width = '0%';
-        b.innerHTML = parseContent(content.replace(/^(日期：|作者：).*\n?/gm, ''));
+        b.innerHTML = content.includes('id="log-content"') ? content : parseContent(content.replace(/^(日期：|作者：).*\n?/gm, ''));
         document.getElementById('win-footer').style.display = isNotice ? 'block' : 'none';
         m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 50);
     };
