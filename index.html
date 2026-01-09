@@ -6,195 +6,157 @@
     <title>奶龙的个人博客</title>
     <style>
         :root {
-            --bg: #0b0b0c; --card: #1c1c1e; --text: #ffffff; --sub: #8e8e93;
-            --accent: #0A84FF; --glass: rgba(255,255,255,0.06);
+            --bg: #0b0b0c; --card: rgba(30,30,32,0.7); --text: #fff; --sub: #8e8e93;
+            --glass: rgba(255,255,255,0.1); --border: rgba(255,255,255,0.15); --accent: #0A84FF;
         }
         body.light-mode {
-            --bg: #f2f2f7; --card: #ffffff; --text: #000000; --sub: #8a8a8e;
-            --glass: rgba(0,0,0,0.03);
+            --bg: #f2f2f7; --card: rgba(255,255,255,0.7); --text: #000; --sub: #8a8a8e;
+            --glass: rgba(0,0,0,0.05); --border: rgba(0,0,0,0.08);
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; transition: 0.3s; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        .container { padding: 20px 16px 120px; max-width: 600px; margin: 0 auto; }
+        .container { padding: 20px 20px 100px; max-width: 600px; margin: 0 auto; transform: translateZ(0); }
         
-        /* 顶部简练化 */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .site-title { font-size: 22px; font-weight: 800; }
-        
-        /* 头像果冻 - 性能版 */
-        .avatar { width: 80px; height: 80px; border-radius: 40px; border: 2px solid var(--glass); display: block; margin: 0 auto 30px; transition: 0.4s cubic-bezier(0.17, 0.89, 0.32, 1.49); }
-        .avatar:active { transform: scale(0.8); }
+        /* 导航头 */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .mode-btn { width: 42px; height: 42px; border-radius: 12px; background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; }
 
-        /* 卡片轻量化 */
-        .card { background: var(--card); border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid var(--glass); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .card:active { background: var(--glass); }
+        /* 内容卡片 */
+        .glass-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 15px; backdrop-filter: blur(15px); transition: 0.2s; }
+        .glass-card:active { transform: scale(0.97); }
 
-        /* 极致轻量弹窗 */
-        .win-overlay { position: fixed; inset:0; background: rgba(0,0,0,0.7); display:none; z-index:3000; align-items:flex-end; }
-        .win-box { 
-            width:100%; background: var(--card); border-radius: 30px 30px 0 0; padding: 25px;
-            transform: translate3d(0, 100%, 0); transition: 0.4s cubic-bezier(0.3, 0.7, 0.2, 1);
-            max-height: 85vh; display: flex; flex-direction: column;
+        /* 公告弹窗 - iOS 26 玻璃特效 */
+        .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(12px); display: none; z-index: 9999; opacity: 0; transition: 0.4s; align-items: center; justify-content: center; }
+        .modal-box { 
+            width: 85%; max-width: 320px; background: var(--card); border: 1px solid var(--border); 
+            border-radius: 30px; padding: 25px; text-align: center; transform: scale(0.85); transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
         }
-        .win-overlay.active { display: flex; }
-        .win-overlay.active .win-box { transform: translate3d(0, 0, 0); }
-        .win-close { align-self: center; width: 40px; height: 5px; background: var(--sub); border-radius: 10px; margin-bottom: 20px; }
+        .modal-mask.show { display: flex; opacity: 1; }
+        .modal-mask.show .modal-box { transform: scale(1); }
 
-        /* 底部 Dock - 减少模糊层 */
-        .dock { 
-            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); 
-            background: var(--card); border: 1px solid var(--glass);
-            padding: 8px 20px; border-radius: 30px; display: flex; gap: 25px; z-index: 2000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        .dock-item { text-align: center; opacity: 0.4; text-decoration: none; color: inherit; }
-        .dock-item.active { opacity: 1; }
-        .dock-icon { font-size: 20px; display: block; }
-        .dock-label { font-size: 10px; font-weight: bold; margin-top: 2px; }
+        /* 底部导航 */
+        .dock { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: var(--card); backdrop-filter: blur(30px); border: 1px solid var(--border); border-radius: 32px; display: flex; padding: 6px 15px; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .dock-item { display: flex; flex-direction: column; align-items: center; width: 70px; padding: 5px 0; opacity: 0.4; transition: 0.3s; cursor: pointer; }
+        .dock-item.active { opacity: 1; transform: translateY(-3px); }
+        .dock-icon { font-size: 20px; margin-bottom: 2px; }
+        .dock-text { font-size: 10px; font-weight: 700; }
 
-        /* 隐藏编辑器 */
-        #editor { width: 100%; flex:1; background: var(--glass); border:none; border-radius:15px; padding:15px; color:var(--text); font-size:16px; margin-top:10px; resize:none; outline:none; }
-        .input-title { width: 100%; background: transparent; border: none; font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 10px; outline: none; }
-        
-        .btn { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 15px; font-weight: bold; width: 100%; margin-top: 15px; }
-
-        /* 应用列表网格 */
-        .app-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .app-item { text-align: center; text-decoration: none; color: inherit; }
-        .app-icon-box { width: 60px; height: 60px; background: var(--card); border-radius: 18px; border: 1px solid var(--glass); display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 6px; }
+        .btn-close { background: var(--accent); color: #fff; border: none; padding: 12px 30px; border-radius: 15px; font-weight: bold; margin-top: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="top-bar">
-            <div><h1 class="site-title">奶龙的个人博客</h1><p id="hitokoto" style="font-size:11px; opacity:0.5;">载入中...</p></div>
-            <div onclick="toggleMode()" style="font-size:20px; cursor:pointer;">🌓</div>
+<div class="container">
+    <div class="header">
+        <div>
+            <h1 style="font-size: 24px; font-weight: 800; letter-spacing: -1px;">奶龙的个人博客</h1>
+            <p id="hitokoto" style="font-size:11px; opacity:0.5; margin-top:4px;"></p>
         </div>
+        <div class="mode-btn" onclick="toggleMode()">🌓</div>
+    </div>
 
-        <div id="view-home">
-            <img src="https://github.com/nailong78.png" class="avatar" onclick="this.style.transform='scale(1.2)';setTimeout(()=>this.style.transform='scale(1)',300)">
-            <div id="list-post"></div>
+    <div id="p-home" class="page">
+        <div style="text-align:center; margin-bottom:30px;">
+            <img src="https://github.com/nailong78.png" style="width:85px; height:85px; border-radius:50%; border:2px solid var(--border);" onclick="this.style.transform='scale(1.2)';setTimeout(()=>this.style.transform='scale(1)',200)">
         </div>
+        <div id="post-list"></div>
+    </div>
 
-        <div id="view-app" style="display:none;"><div class="app-grid" id="list-app"></div></div>
-
-        <div id="view-me" style="display:none;">
-            <div class="card" style="text-align:center;">
-                <h2 id="user-name">访客</h2>
-                <div id="admin-tools" style="display:none; margin-top:15px;">
-                    <button class="btn" onclick="showEditor()">📝 发布新文章</button>
-                </div>
-                <button class="btn" style="background:#ff3b30; margin-top:10px;" onclick="localStorage.clear();location.reload()">退出登录</button>
+    <div id="p-about" class="page" style="display:none;">
+        <div class="glass-card">
+            <h2 style="margin-bottom:10px;">关于本站</h2>
+            <p style="font-size:15px; line-height:1.6; opacity:0.8;">这里是奶龙的灵感实验室。基于 iOS 26 玻璃拟态美学构建，追求极致的静态阅读体验。</p>
+            <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border);">
+                <p style="font-size:12px; color:var(--sub);">Framework: Vanilla JS / CSS 4.0</p>
+                <p style="font-size:12px; color:var(--sub);">Design: iOS 26 Glassmorphism</p>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="win-overlay" id="win-overlay" onclick="closeWin(event)">
-        <div class="win-box" id="win-box">
-            <div class="win-close" onclick="closeWin()"></div>
-            <div id="win-content" style="overflow-y:auto;"></div>
-        </div>
+<div class="modal-mask" id="notice-mask">
+    <div class="modal-box">
+        <div style="font-size:30px; margin-bottom:10px;">📢</div>
+        <h3 id="notice-title" style="margin-bottom:10px;">系统公告</h3>
+        <div id="notice-content" style="font-size:14px; opacity:0.7; line-height:1.6; max-height:200px; overflow-y:auto;">加载中...</div>
+        <button class="btn-close" onclick="closeNotice()">知道了</button>
     </div>
+</div>
 
-    <div class="dock">
-        <div class="dock-item active" onclick="nav('home', this)"><span class="dock-icon">🏠</span><span class="dock-label">首页</span></div>
-        <div class="dock-item" onclick="nav('app', this)"><span class="dock-icon">🚀</span><span class="dock-label">应用</span></div>
-        <div class="dock-item" onclick="nav('me', this)"><span class="dock-icon">👤</span><span class="dock-label">我的</span></div>
+<div class="dock">
+    <div class="dock-item active" onclick="nav('home', this)">
+        <span class="dock-icon">🏠</span><span class="dock-text">首页</span>
     </div>
+    <div class="dock-item" onclick="nav('about', this)">
+        <span class="dock-icon">ℹ️</span><span class="dock-text">关于</span>
+    </div>
+</div>
 
-    <script>
-        const API = "https://api.github.com/repos/nailong78/nailong78.github.io/contents";
+<script>
+    const user = "nailong78", repo = "nailong78.github.io";
 
-        function nav(v, el) {
-            ['home','app','me'].forEach(i => document.getElementById('view-'+i).style.display = 'none');
-            document.getElementById('view-'+v).style.display = 'block';
-            document.querySelectorAll('.dock-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-        }
+    // 路由
+    const nav = (p, el) => {
+        document.querySelectorAll('.page').forEach(s => s.style.display = 'none');
+        document.getElementById('p-'+p).style.display = 'block';
+        document.querySelectorAll('.dock-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+    };
 
-        function toggleMode() {
-            const isL = document.body.classList.toggle('light-mode');
-            localStorage.setItem('mode', isL ? 'light' : 'dark');
-        }
+    // 主题
+    const toggleMode = () => {
+        const isL = document.body.classList.toggle('light-mode');
+        localStorage.setItem('mode', isL ? 'light' : 'dark');
+    };
 
-        async function showPost(name) {
-            const res = await fetch(`posts/${name}`);
-            const text = await res.text();
-            openWin(`<h2>${name.replace('.txt','')}</h2><div style="margin-top:15px; line-height:1.7;">${text}</div>`);
-        }
+    // 弹窗控制
+    const closeNotice = () => {
+        const m = document.getElementById('notice-mask');
+        m.classList.remove('show');
+        setTimeout(() => m.style.display = 'none', 400);
+    };
 
-        function showEditor() {
-            openWin(`
-                <input id="new-title" class="input-title" placeholder="文章标题">
-                <textarea id="new-body" id="editor" style="width:100%;height:300px;border-radius:15px;padding:10px;background:var(--glass);color:var(--text);border:none;outline:none;" placeholder="正文内容..."></textarea>
-                <button class="btn" onclick="publish()">同步到 GitHub</button>
-            `);
-        }
+    const init = async () => {
+        if(localStorage.getItem('mode') === 'light') document.body.classList.add('light-mode');
 
-        function publish() {
-            const t = document.getElementById('new-title').value;
-            const b = document.getElementById('new-body').value;
-            if(!t || !b) return;
-            window.open(`https://github.com/nailong78/nailong78.github.io/new/main/posts?filename=${t}.txt&value=${encodeURIComponent(b)}`);
-        }
-
-        function openWin(html) {
-            document.getElementById('win-content').innerHTML = html;
-            document.getElementById('win-overlay').classList.add('active');
-        }
-
-        function closeWin(e) {
-            if(!e || e.target.id === 'win-overlay' || e.target.className === 'win-close') {
-                document.getElementById('win-overlay').classList.remove('active');
+        // 加载公告 (announcement/notice.txt)
+        try {
+            const r = await fetch('announcement/notice.txt');
+            if(r.ok) {
+                document.getElementById('notice-content').innerText = await r.text();
+                const m = document.getElementById('notice-mask');
+                m.style.display = 'flex';
+                setTimeout(() => m.classList.add('show'), 50);
             }
-        }
+        } catch(e) { console.log("无公告"); }
 
-        async function init() {
-            if(localStorage.getItem('mode') === 'light') document.body.classList.add('light-mode');
-            
-            // 文章加载
-            fetch(API+"/posts").then(r=>r.json()).then(data=>{
-                const list = document.getElementById('list-post');
-                data.filter(f=>f.name.endsWith('.txt')).forEach(f=>{
-                    const div = document.createElement('div');
-                    div.className = 'card';
-                    div.innerHTML = `<h3>${f.name.replace('.txt','')}</h3><p style="font-size:12px;opacity:0.5;margin-top:5px;">查看全文</p>`;
-                    div.onclick = () => showPost(f.name);
-                    list.appendChild(div);
-                });
+        // 加载文章
+        const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/posts`);
+        if(res.ok) {
+            const data = await res.json();
+            const list = document.getElementById('post-list');
+            data.filter(f => f.name.endsWith('.txt')).forEach(f => {
+                const card = document.createElement('div');
+                card.className = 'glass-card';
+                card.innerHTML = `<h3>${f.name.replace('.txt','')}</h3><p style="font-size:12px; opacity:0.4; margin-top:8px;">阅读全文</p>`;
+                card.onclick = async () => {
+                    const postRes = await fetch(`posts/${f.name}`);
+                    const text = await postRes.text();
+                    document.getElementById('notice-title').innerText = f.name.replace('.txt','');
+                    document.getElementById('notice-content').innerText = text;
+                    document.getElementById('notice-mask').style.display = 'flex';
+                    setTimeout(() => document.getElementById('notice-mask').classList.add('show'), 50);
+                };
+                list.appendChild(card);
             });
-
-            // 应用加载
-            fetch(API+"/apps").then(r=>r.json()).then(data=>{
-                const list = document.getElementById('list-app');
-                data.forEach(f=>{
-                    const isPy = f.name.endsWith('.py');
-                    list.innerHTML += `<a href="${isPy?'python_runner.html?file='+f.name:'apps/'+f.name}" class="app-item">
-                        <div class="app-icon-box">${isPy?'🐍':'🌐'}</div>
-                        <span style="font-size:11px;">${f.name.split('.')[0]}</span>
-                    </a>`;
-                });
-            });
-
-            // 登录
-            const u = localStorage.getItem('user');
-            if(u) {
-                document.getElementById('user-name').innerText = u;
-                if(localStorage.getItem('admin')) document.getElementById('admin-tools').style.display = 'block';
-            } else {
-                const name = prompt("进入奶龙的博客，请留下你的大名：");
-                if(name) {
-                    localStorage.setItem('user', name);
-                    if(name === 'admin') localStorage.setItem('admin', '1');
-                    location.reload();
-                }
-            }
-            fetch('https://v1.hitokoto.cn?c=e').then(r=>r.json()).then(d=>document.getElementById('hitokoto').innerText=d.hitokoto);
         }
+        
+        // 每日一言
+        fetch('https://v1.hitokoto.cn?c=e').then(r=>r.json()).then(d=>document.getElementById('hitokoto').innerText=d.hitokoto);
+    };
 
-        window.onload = init;
-    </script>
+    window.onload = init;
+</script>
 </body>
 </html>
