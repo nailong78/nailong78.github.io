@@ -1,46 +1,45 @@
-# 适配版云端执行器 (去掉了浏览器不支持的 subprocess 和本地环境依赖)
 import micropip
-import js
+import asyncio
 
-async def start():
+async def main():
     print("="*30)
-    print("正在为 iOS 26 环境配置依赖...")
+    print("🚀 正在加载 iOS 26 运行环境...")
     
     try:
-        # 在浏览器运行环境中安装 requests 的替代品 pyodide-http 或直接用标准库
+        # 安装依赖
         await micropip.install("requests")
         import requests
         
-        # 配置信息
+        # 配置信息 (使用 jsdelivr 镜像彻底解决 Failed to fetch 报错)
         USER = "nailong78"
         REPO = "-SMS-"
-        LOG_FILE = "更新日志.txt"
-        CODE_FILE = "Code.py"
-
-        # 使用 jsdelivr 加速
-        LOG_URL = f"https://cdn.jsdelivr.net/gh/{USER}/{REPO}@main/{LOG_FILE}"
-        CODE_URL = f"https://cdn.jsdelivr.net/gh/{USER}/{REPO}@main/{CODE_FILE}"
         
-        print("最新更新日志：")
+        # 加上 @main 确保指向主分支，使用 fastly 加速
+        LOG_URL = f"https://fastly.jsdelivr.net/gh/{USER}/{REPO}@main/更新日志.txt"
+        CODE_URL = f"https://fastly.jsdelivr.net/gh/{USER}/{REPO}@main/Code.py"
+
+        # 1. 获取日志
+        print("正在同步云端日志...")
         log_resp = requests.get(LOG_URL)
-        log_resp.encoding = 'utf-8'
         if log_resp.status_code == 200:
+            log_resp.encoding = 'utf-8'
+            print("\n【最新更新】")
             print(log_resp.text)
-        else:
-            print("未能获取到更新日志。")
-        print("="*30 + "\n")
-
-        print("正在同步云端指令...")
-        code_resp = requests.get(CODE_URL)
-        code_resp.encoding = 'utf-8'
         
-        # 执行代码
-        exec(code_resp.text, globals())
+        # 2. 获取并执行代码
+        print("\n正在拉取云端指令集...")
+        code_resp = requests.get(CODE_URL)
+        if code_resp.status_code == 200:
+            code_resp.encoding = 'utf-8'
+            print("同步完成，准备启动...\n")
+            # 执行云端代码
+            exec(code_resp.text, globals())
+        else:
+            print("错误：无法连接到云端指令集。")
 
     except Exception as e:
-        print(f"发生错误: {e}")
-        print("提示：如果遇到跨域(CORS)错误，是因为GitHub禁止了浏览器直接请求原始代码。")
+        print(f"\n❌ 运行出错: {e}")
+        print("提示：请检查 -SMS- 仓库是否为 Public 公开状态。")
 
-# 启动
-import asyncio
-asyncio.ensure_future(start())
+# 异步启动
+asyncio.ensure_future(main())
