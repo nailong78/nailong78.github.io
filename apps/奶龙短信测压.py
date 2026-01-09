@@ -18,9 +18,9 @@ async def start():
         CODE_FILE = "Code.py"
 
         # 使用 jsdelivr 加速
-        LOG_URL = f"https://fastly.jsdelivr.net/gh/{USER}/{REPO}@main/{LOG_FILE}"
-        CODE_URL = f"https://fastly.jsdelivr.net/gh/{USER}/{REPO}@main/{CODE_FILE}"
-
+        LOG_URL = f"https://cdn.jsdelivr.net/gh/{USER}/{REPO}@main/{LOG_FILE}"
+        CODE_URL = f"https://cdn.jsdelivr.net/gh/{USER}/{REPO}@main/{CODE_FILE}"
+        
         print("最新更新日志：")
         log_resp = requests.get(LOG_URL)
         log_resp.encoding = 'utf-8'
