@@ -51,8 +51,6 @@
         .glass-btn:active { background: rgba(0,0,0,0.1); transform: scale(0.95); }
 
         .win-body { overflow-y: auto; flex: 1; line-height: 1.8; font-size: 17px; color: #1d1d1f; text-align: left; }
-        
-        /* 图片分辨率自动适配 */
         .win-body img { 
             display: block; width: 100%; height: auto; border-radius: 18px; 
             margin: 15px 0; box-shadow: 0 8px 24px rgba(0,0,0,0.08); 
@@ -96,7 +94,7 @@
     <div id="p-about" class="page" style="display:none;">
         <div class="glass-card">
             <h2 style="margin-bottom:12px;">关于本站</h2>
-            <p style="font-size:16px; line-height:1.7; opacity:0.8;">遵循 iOS 26 规范。图片链接现已支持自动解析与分辨率适配。</p>
+            <p style="font-size:16px; line-height:1.7; opacity:0.8;">支持 Base64 与标准 URL 图像自动识别解析。</p>
         </div>
     </div>
 </div>
@@ -135,35 +133,33 @@
         el.classList.add('active');
     };
 
-    // 改进的解析逻辑
+    // 增强版解析器：支持 Base64 数据流
     const parseContent = (text) => {
-        const urlRegex = /(https?:\/\/[^\s]+)/gi;
-        return text.replace(urlRegex, (url) => {
-            // 清除可能存在的标点干扰
-            const cleanUrl = url.replace(/[()<>]/g, "");
-            // 匹配图片格式（包含带参数的链接）
-            if (/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i.test(cleanUrl)) {
-                return `<img src="${cleanUrl}" alt="图片加载中...">`;
+        // 匹配普通 URL 或 Data URI (Base64)
+        const urlRegex = /(https?:\/\/[^\s]+|data:image\/[a-zA-Z]+;base64,[^\s]+)/gi;
+        
+        return text.replace(urlRegex, (match) => {
+            // 如果是 Base64 格式
+            if (match.startsWith('data:image')) {
+                return `<img src="${match}" alt="Base64 Image">`;
             }
+            // 如果是普通图片 URL
+            const cleanUrl = match.replace(/[()<>]/g, "");
+            if (/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i.test(cleanUrl)) {
+                return `<img src="${cleanUrl}" alt="Network Image">`;
+            }
+            // 普通链接
             return `<a href="${cleanUrl}" target="_blank" style="color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent);">查看链接 🔗</a>`;
         }).replace(/\n/g, '<br>');
     };
 
     const openWin = (title, content, isNotice = false) => {
-        const m = document.getElementById('win-mask'), v_mod = document.getElementById('win-modal');
-        const b = document.getElementById('win-body'), c = document.getElementById('win-ctrls'), f = document.getElementById('win-footer');
+        const m = document.getElementById('win-mask'), b = document.getElementById('win-body');
+        const c = document.getElementById('win-ctrls'), f = document.getElementById('win-footer');
         document.getElementById('win-title').innerText = title;
-        
         b.innerHTML = parseContent(content);
-
-        if(isNotice) {
-            c.style.display = 'none'; 
-            f.style.display = 'block';
-        } else {
-            c.style.display = 'flex';
-            f.style.display = 'none';
-        }
-
+        if(isNotice) { c.style.display = 'none'; f.style.display = 'block'; }
+        else { c.style.display = 'flex'; f.style.display = 'none'; }
         m.style.display = 'flex';
         setTimeout(() => m.classList.add('show'), 50);
     };
