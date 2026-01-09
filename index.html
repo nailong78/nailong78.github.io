@@ -7,184 +7,253 @@
     <style>
         :root {
             --bg-color: #050505; --text-main: #ffffff; --text-sub: rgba(255, 255, 255, 0.5);
-            --glass-bg: rgba(255, 255, 255, 0.08); --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-bg: rgba(255, 255, 255, 0.1); --glass-border: rgba(255, 255, 255, 0.15);
+            --blob-1: rgba(120, 0, 255, 0.3); --blob-2: rgba(0, 100, 255, 0.3);
             --accent: #0A84FF;
         }
         body.light-mode {
             --bg-color: #f2f4f6; --text-main: #1a1a1a; --text-sub: rgba(0, 0, 0, 0.5);
-            --glass-bg: rgba(255, 255, 255, 0.6); --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-bg: rgba(255, 255, 255, 0.6); --glass-border: rgba(0, 0, 0, 0.05);
+            --blob-1: rgba(255, 100, 200, 0.2); --blob-2: rgba(0, 200, 255, 0.2);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg-color); color: var(--text-main); min-height: 100vh; overflow-x: hidden; padding-bottom: 120px; transition: 0.6s ease; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; background: var(--bg-color); color: var(--text-main); min-height: 100vh; overflow-x: hidden; padding-bottom: 110px; transition: 0.6s ease; }
         
-        /* 玻璃弹窗系统 */
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); display:none; z-index: 2000; align-items: center; justify-content: center; opacity: 0; transition: 0.4s; }
-        .modal-content { width: 85%; max-width: 320px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 30px; padding: 25px; backdrop-filter: blur(40px); transform: scale(0.9); transition: 0.4s cubic-bezier(0.2, 1, 0.3, 1); }
-        .modal-overlay.show { display: flex; opacity: 1; }
-        .modal-overlay.show .modal-content { transform: scale(1); }
+        /* 动态液态背景 */
+        .background-blob { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; filter: blur(60px); }
+        .blob { position: absolute; border-radius: 50%; width: 300px; height: 300px; animation: move 20s infinite alternate linear; }
+        .blob-1 { top: -5%; left: -5%; background: var(--blob-1); }
+        .blob-2 { bottom: 10%; right: -5%; background: var(--blob-2); }
+        @keyframes move { from { transform: translate3d(0,0,0); } to { transform: translate3d(50px, 80px, 0); } }
+
+        .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 20px; }
         
-        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--text-main); font-size: 14px; outline: none; }
-        .btn-primary { width: 100%; padding: 12px; border-radius: 12px; background: var(--accent); border: none; color: #fff; font-weight: 600; margin-top: 10px; cursor: pointer; }
-        .btn-link { font-size: 12px; color: var(--text-sub); text-align: center; margin-top: 15px; cursor: pointer; display: block; }
+        /* 顶部导航 */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; height: 44px; position: relative; }
+        .theme-control { position: relative; display: flex; gap: 10px; }
+        .glass-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; }
 
-        /* 顶部与导航 */
-        .top-bar { display: flex; justify-content: space-between; padding: 20px; align-items: center; }
-        .right-controls { display: flex; gap: 10px; }
-        .glass-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        /* 主题菜单 */
+        .theme-menu { position: absolute; top: 55px; right: 0; width: 140px; background: var(--glass-bg); backdrop-filter: blur(40px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 6px; display: none; flex-direction: column; z-index: 2000; animation: ios-pop 0.3s ease; }
+        @keyframes ios-pop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .menu-item { padding: 12px; border-radius: 14px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; }
+        .menu-item.active { color: var(--accent); }
 
-        /* 底部 Dock */
-        .dock { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--glass-bg); backdrop-filter: blur(30px); border: 1px solid var(--glass-border); padding: 6px; border-radius: 100px; display: flex; gap: 5px; z-index: 1000; }
-        .dock-item { padding: 10px 18px; border-radius: 100px; font-size: 13px; font-weight: 600; opacity: 0.5; transition: 0.3s; cursor: pointer; }
-        .dock-item.active { opacity: 1; background: rgba(255,255,255,0.1); }
-        .dock-sep { width: 1px; background: var(--glass-border); margin: 8px 5px; }
+        /* 登录弹窗 */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 3000; opacity: 0; transition: 0.3s; }
+        .modal-overlay.show { opacity: 1; display: flex; }
+        .modal-content { width: 85%; max-width: 320px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 32px; padding: 30px; backdrop-filter: blur(40px); }
+        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 15px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--text-main); outline: none; }
 
-        /* 其它样式参考之前 */
-        .container { padding: 0 20px; }
-        .page { transition: 0.4s; }
+        /* 底部 Dock (iOS 26 风格) */
+        .dock-wrapper { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; background: var(--glass-bg); backdrop-filter: blur(30px); border: 1px solid var(--glass-border); padding: 6px; border-radius: 100px; z-index: 1000; }
+        .dock-group { display: flex; position: relative; }
+        .dock-item { padding: 10px 20px; font-size: 13px; font-weight: 600; opacity: 0.5; cursor: pointer; transition: 0.3s; z-index: 2; }
+        .dock-item.active { opacity: 1; }
+        .dock-sep { width: 1px; height: 20px; background: var(--glass-border); margin: 0 8px; }
+        
+        /* 停留的高亮滑块 */
+        .dock-slider { position: absolute; top: 0; left: 0; height: 100%; background: rgba(255,255,255,0.15); border-radius: 100px; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1); z-index: 1; }
+        body.light-mode .dock-slider { background: rgba(0,0,0,0.06); }
+
+        /* 内容区 */
+        .page { animation: page-in 0.5s ease; }
+        @keyframes page-in { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
         .hidden { display: none; }
-        .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 25px; padding: 20px; margin-bottom: 15px; }
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 28px; padding: 22px; margin-bottom: 15px; }
+        .avatar { width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--glass-border); transition: 0.4s; }
+        .jello { animation: jello 0.6s both; }
+        @keyframes jello { 0%,100%{transform:scale(1)} 30%{transform:scale(1.2,0.8)} 50%{transform:scale(0.8,1.2)} }
+        
+        .app-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .app-item { text-align: center; text-decoration: none; color: inherit; }
+        .app-icon { width: 64px; height: 64px; background: var(--glass-bg); border-radius: 18px; border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 8px; }
     </style>
 </head>
-<body class="dark-mode">
+<body>
+    <div class="background-blob"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
 
     <div class="modal-overlay" id="loginModal">
         <div class="modal-content">
-            <h2 id="modalTitle" style="margin-bottom:15px; text-align:center;">登录</h2>
-            <div id="loginFields">
+            <h3 style="text-align:center; margin-bottom:20px;" id="modalTitle">用户登录</h3>
+            <div id="loginForm">
                 <input type="text" id="username" placeholder="用户名">
                 <input type="password" id="password" placeholder="密码">
-                <button class="btn-primary" onclick="handleLogin()">确认登录</button>
+                <button onclick="doLogin()" style="width:100%; padding:14px; border-radius:15px; border:none; background:var(--accent); color:#fff; font-weight:600; margin-top:10px;">确认登录</button>
             </div>
-            <div id="adminFields" style="display:none;">
+            <div id="adminForm" style="display:none;">
                 <input type="password" id="adminKey" placeholder="管理员密钥 (admin)">
-                <button class="btn-primary" onclick="handleAdminLogin()">验证进入</button>
+                <button onclick="doAdminLogin()" style="width:100%; padding:14px; border-radius:15px; border:none; background:var(--accent); color:#fff; font-weight:600; margin-top:10px;">验证进入</button>
             </div>
-            <span class="btn-link" onclick="toggleAdminMode()" id="toggleText">管理员登录选项</span>
-            <span class="btn-link" onclick="closeLogin()">取消</span>
-        </div>
-    </div>
-
-    <div class="top-bar">
-        <div class="site-info">
-            <h1 style="font-size:18px;">Garden 26</h1>
-        </div>
-        <div class="right-controls">
-            <div class="glass-btn" onclick="openLogin()">👤</div>
-            <div class="glass-btn" onclick="toggleThemeMenu()">🌓</div>
+            <p onclick="toggleAdmin()" style="text-align:center; font-size:12px; margin-top:20px; opacity:0.5; cursor:pointer;" id="toggleBtn">管理员登录</p>
+            <p onclick="closeLogin()" style="text-align:center; font-size:12px; margin-top:10px; opacity:0.5; cursor:pointer;">取消</p>
         </div>
     </div>
 
     <div class="container">
+        <div class="top-bar">
+            <div><h2 style="font-size:18px;">Garden 26</h2><p id="hitokoto" style="font-size:11px; opacity:0.5;">载入中...</p></div>
+            <div class="theme-control">
+                <div class="glass-btn" onclick="toggleThemeMenu()">🌓</div>
+                <div class="theme-menu" id="themeMenu">
+                    <div class="menu-item" onclick="setTheme('auto')">自动</div>
+                    <div class="menu-item" onclick="setTheme('light')">浅色</div>
+                    <div class="menu-item" onclick="setTheme('dark')">深色</div>
+                </div>
+            </div>
+        </div>
+
         <div id="page-home" class="page">
-            <div style="text-align: center; margin: 20px 0;">
-                <img src="https://github.com/nailong78.png" style="width:80px; border-radius:50%; border:3px solid var(--glass-border);" id="avatar">
+            <div style="text-align:center; margin-bottom:30px;">
+                <img src="https://github.com/nailong78.png" class="avatar" id="avatar" onclick="jello()">
                 <h2 style="margin-top:10px;">奶龙</h2>
             </div>
             <div id="post-list"></div>
         </div>
 
         <div id="page-app" class="page hidden">
-            <div class="glass-card"><h3>我的应用</h3><div id="app-list" style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-top:15px;"></div></div>
+            <div class="glass-card"><h3>我的应用</h3><div class="app-grid" id="app-list" style="margin-top:20px;"></div></div>
         </div>
 
         <div id="page-about" class="page hidden">
-            <div class="glass-card"><h3>关于</h3><p>iOS 26 风格试验场</p></div>
+            <div class="glass-card"><h3>关于</h3><p style="margin-top:10px; opacity:0.7;">iOS 26 风格试验场。全自动化管理系统已就绪。</p></div>
         </div>
 
         <div id="page-me" class="page hidden">
             <div class="glass-card">
-                <h2 id="meTitle">未登录</h2>
-                <div id="adminTools" style="display:none; margin-top:20px; border-top:1px solid var(--glass-border); padding-top:15px;">
-                    <p style="color:var(--accent); font-weight:bold;">管理员控制台</p>
-                    <button class="btn-primary" style="background:rgba(255,255,255,0.1)" onclick="alert('进入编辑模式...')">📝 新增文章</button>
-                    <button class="btn-primary" style="background:rgba(255,255,255,0.1)" onclick="alert('用户管理...')">👥 管理用户</button>
+                <h2 id="userName">未登录</h2>
+                <div id="adminPanel" style="display:none; margin-top:20px; border-top:1px solid var(--glass-border); padding-top:20px;">
+                    <p style="color:var(--accent); margin-bottom:15px;">管理员控制台</p>
+                    <a href="https://github.com/nailong78/nailong78.github.io/new/main/posts" target="_blank" style="text-decoration:none;">
+                        <div class="glass-card" style="padding:15px; background:rgba(255,255,255,0.05); text-align:center;">📝 在线发布新文章</div>
+                    </a>
                 </div>
-                <button class="btn-primary" style="background:#ff3b30; margin-top:20px;" onclick="logout()">退出登录</button>
+                <button onclick="logout()" style="width:100%; padding:14px; border-radius:15px; border:none; background:#ff3b30; color:#fff; font-weight:600; margin-top:20px;">退出登录</button>
             </div>
         </div>
     </div>
 
-    <div class="dock">
-        <div class="dock-item active" onclick="showPage('home', this)">首页</div>
-        <div class="dock-item" onclick="showPage('app', this)">应用</div>
-        <div class="dock-item" onclick="showPage('about', this)">关于</div>
+    <div class="dock-wrapper">
+        <div class="dock-group" id="main-group">
+            <div class="dock-slider" id="main-slider"></div>
+            <div class="dock-item active" onclick="navTo('home', this)">首页</div>
+            <div class="dock-item" onclick="navTo('app', this)">应用</div>
+            <div class="dock-item" onclick="navTo('about', this)">关于</div>
+        </div>
         <div class="dock-sep"></div>
-        <div class="dock-item" id="dock-me" onclick="handleMeClick(this)">登录</div>
+        <div class="dock-group" id="user-group">
+            <div class="dock-slider" id="user-slider" style="opacity:0;"></div>
+            <div class="dock-item" id="user-btn" onclick="handleUserClick(this)">登录</div>
+        </div>
     </div>
 
     <script>
-        // --- 核心逻辑 ---
-        let isAdmin = false;
-        let currentUser = null;
+        const user = "nailong78", repo = "nailong78.github.io";
 
+        // --- 导航系统 (修复滑块停留) ---
+        function navTo(page, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById('page-'+page).classList.remove('hidden');
+            
+            const group = el.parentElement;
+            const slider = group.querySelector('.dock-slider');
+            group.querySelectorAll('.dock-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            
+            slider.style.opacity = "1";
+            slider.style.width = el.offsetWidth + 'px';
+            slider.style.transform = `translateX(${el.offsetLeft}px)`;
+
+            // 如果点击的是左侧组，隐藏右侧组的滑块
+            if(group.id === 'main-group') document.getElementById('user-slider').style.opacity = "0";
+            else document.getElementById('main-slider').style.opacity = "0";
+        }
+
+        // --- 用户系统 ---
+        function handleUserClick(el) {
+            if(!localStorage.getItem('user')) openLogin();
+            else navTo('me', el);
+        }
         function openLogin() { 
-            document.getElementById('loginModal').style.display = 'flex';
-            setTimeout(() => document.getElementById('loginModal').classList.add('show'), 10);
+            const m = document.getElementById('loginModal');
+            m.style.display = 'flex'; setTimeout(()=>m.classList.add('show'),10);
         }
         function closeLogin() { 
-            document.getElementById('loginModal').classList.remove('show');
-            setTimeout(() => document.getElementById('loginModal').style.display = 'none', 400);
+            const m = document.getElementById('loginModal');
+            m.classList.remove('show'); setTimeout(()=>m.style.display='none',300);
         }
-
-        function toggleAdminMode() {
-            const isAdm = document.getElementById('loginFields').style.display === 'none';
-            document.getElementById('loginFields').style.display = isAdm ? 'block' : 'none';
-            document.getElementById('adminFields').style.display = isAdm ? 'none' : 'block';
-            document.getElementById('modalTitle').innerText = isAdm ? '登录' : '管理员验证';
-            document.getElementById('toggleText').innerText = isAdm ? '管理员登录选项' : '切换普通登录';
+        function toggleAdmin() {
+            const isA = document.getElementById('loginForm').style.display === 'none';
+            document.getElementById('loginForm').style.display = isA ? 'block' : 'none';
+            document.getElementById('adminForm').style.display = isA ? 'none' : 'block';
+            document.getElementById('toggleBtn').innerText = isA ? '管理员登录' : '切换普通登录';
         }
-
-        function handleAdminLogin() {
-            if(document.getElementById('adminKey').value === 'admin') {
-                isAdmin = true;
-                currentUser = "管理员 (奶龙)";
-                loginSuccess();
-            } else { alert('密钥错误'); }
+        function doLogin() { successLogin(document.getElementById('username').value || "游客", false); }
+        function doAdminLogin() {
+            if(document.getElementById('adminKey').value === 'admin') successLogin("奶龙", true);
+            else alert('密钥错误');
         }
-
-        function handleLogin() {
-            currentUser = document.getElementById('username').value || "测试用户";
-            loginSuccess();
-        }
-
-        function loginSuccess() {
-            localStorage.setItem('user', currentUser);
-            localStorage.setItem('isAdmin', isAdmin);
-            closeLogin();
-            updateUI();
-            showPage('me', document.getElementById('dock-me'));
-        }
-
-        function logout() {
-            localStorage.clear();
+        function successLogin(u, a) {
+            localStorage.setItem('user', u); localStorage.setItem('isAdmin', a);
             location.reload();
         }
+        function logout() { localStorage.clear(); location.reload(); }
 
-        function updateUI() {
-            const savedUser = localStorage.getItem('user');
-            if(savedUser) {
-                document.getElementById('dock-me').innerText = "中心";
-                document.getElementById('meTitle').innerText = "你好, " + savedUser;
-                if(localStorage.getItem('isAdmin') === 'true') {
-                    document.getElementById('adminTools').style.display = 'block';
-                }
+        // --- 主题 & 特效 ---
+        function setTheme(m) {
+            localStorage.setItem('blog-mode', m); applyTheme();
+            document.getElementById('themeMenu').style.display = 'none';
+        }
+        function applyTheme() {
+            const m = localStorage.getItem('blog-mode') || 'auto';
+            const isDark = m === 'dark' || (m === 'auto' && (new Date().getHours() >= 18 || new Date().getHours() < 6));
+            document.body.classList.toggle('light-mode', !isDark);
+        }
+        function toggleThemeMenu() { 
+            const m = document.getElementById('themeMenu');
+            m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+        }
+        function jello() {
+            const a = document.getElementById('avatar');
+            if(navigator.vibrate) navigator.vibrate(10);
+            a.classList.remove('jello'); void a.offsetWidth; a.classList.add('jello');
+        }
+
+        // --- 自动化加载 ---
+        async function loadContent() {
+            const pRes = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/posts`);
+            if(pRes.ok) {
+                const data = await pRes.json();
+                const list = document.getElementById('post-list');
+                data.filter(f => f.name.endsWith('.txt')).forEach(file => {
+                    list.innerHTML += `<a href="post.html?file=${encodeURIComponent(file.name)}" style="text-decoration:none; color:inherit;"><div class="glass-card"><h3>${file.name.replace('.txt','')}</h3><p style="font-size:12px; opacity:0.5; margin-top:5px;">点击阅读全文</p></div></a>`;
+                });
+            }
+            const aRes = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/apps`);
+            if(aRes.ok) {
+                const data = await aRes.json();
+                const list = document.getElementById('app-list');
+                data.forEach(file => {
+                    const isPy = file.name.endsWith('.py');
+                    list.innerHTML += `<a href="${isPy ? 'python_runner.html?file='+file.name : 'apps/'+file.name}" class="app-item"><div class="app-icon">${isPy ? '🐍':'🌐'}</div><span>${file.name.split('.')[0]}</span></a>`;
+                });
             }
         }
 
-        function handleMeClick(el) {
-            if(!localStorage.getItem('user')) openLogin();
-            else showPage('me', el);
-        }
-
-        function showPage(p, el) {
-            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
-            document.getElementById('page-'+p).classList.remove('hidden');
-            document.querySelectorAll('.dock-item').forEach(item => item.classList.remove('active'));
-            el.classList.add('active');
-        }
-
-        // 模拟加载数据 (参考之前代码)
-        window.onload = () => { updateUI(); /* 加载数据代码... */ };
+        window.onload = () => {
+            applyTheme(); loadContent();
+            if(localStorage.getItem('user')) {
+                document.getElementById('user-btn').innerText = "中心";
+                document.getElementById('userName').innerText = "你好, " + localStorage.getItem('user');
+                if(localStorage.getItem('isAdmin') === 'true') document.getElementById('adminPanel').style.display = 'block';
+            }
+            // 初始化首页滑块位置
+            const homeBtn = document.querySelector('.dock-item');
+            const slider = document.getElementById('main-slider');
+            slider.style.width = homeBtn.offsetWidth + 'px';
+            fetch('https://v1.hitokoto.cn?c=e').then(res=>res.json()).then(d=>document.getElementById('hitokoto').innerText = d.hitokoto);
+        };
+        document.addEventListener('click', (e) => { if(!e.target.closest('.theme-control')) document.getElementById('themeMenu').style.display = 'none'; });
     </script>
 </body>
 </html>
