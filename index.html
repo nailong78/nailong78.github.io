@@ -16,31 +16,32 @@
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: #000; overflow-x: hidden; }
 
-        /* 背景与呼吸灯光晕 */
+        /* 背景 */
         .hero-banner {
             position: absolute; top: 0; left: 0; width: 100%; height: 400px;
             background: url('首页背景图.jpeg') no-repeat center center;
             background-size: cover; z-index: -1;
             -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
             mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-            display: flex; align-items: center; justify-content: center;
         }
+
+        /* 欢迎语呼吸灯特效 */
+        .welcome-area { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; margin-top: 10px; }
         .welcome-glow {
-            position: absolute; width: 250px; height: 250px;
-            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(0,122,255,0.3) 50%, transparent 70%);
-            filter: blur(40px); mix-blend-mode: overlay; pointer-events: none;
+            position: absolute; width: 180px; height: 180px;
+            background: radial-gradient(circle, rgba(0,122,255,0.4) 0%, transparent 70%);
+            filter: blur(20px); pointer-events: none;
             animation: welcome-breath 4s infinite ease-in-out;
         }
         .welcome-text {
-            position: relative; color: white; font-size: 26px; font-weight: 800;
-            letter-spacing: 4px; text-shadow: 0 0 20px rgba(0,0,0,0.3);
-            animation: text-breath 4s infinite ease-in-out;
+            position: relative; color: var(--accent); font-size: 22px; font-weight: 800;
+            letter-spacing: 4px; animation: text-breath 4s infinite ease-in-out;
         }
-        @keyframes welcome-breath { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 0.8; } }
-        @keyframes text-breath { 0%, 100% { opacity: 0.7; transform: scale(0.98); } 50% { opacity: 1; transform: scale(1.05); } }
+        @keyframes welcome-breath { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.3); opacity: 0.6; } }
+        @keyframes text-breath { 0%, 100% { opacity: 0.6; transform: scale(0.98); } 50% { opacity: 1; transform: scale(1.05); } }
         
         .container { padding: 40px 20px 140px; max-width: 600px; margin: 0 auto; position: relative; }
-        .header { margin-bottom: 35px; }
+        .header { margin-bottom: 20px; }
         .site-title-box { display: flex; align-items: center; gap: 10px; }
         .title-avatar { width: 28px; height: 28px; border-radius: 8px; border: 1.5px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .site-title { font-size: 28px; font-weight: 800; letter-spacing: -1.2px; }
@@ -55,35 +56,31 @@
         }
         .glass-card:active { transform: scale(0.97); }
         
-        /* 关于页面特有样式 */
+        /* 文章元数据展示 */
+        .post-info { display: flex; gap: 10px; margin-top: 8px; font-size: 11px; font-weight: 600; opacity: 0.5; }
+        .post-tag { background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 6px; }
+
         .profile-section { text-align: center; padding: 20px 0; }
         .profile-avatar-big { width: 90px; height: 90px; border-radius: 28px; border: 4px solid #fff; box-shadow: 0 12px 30px rgba(0,0,0,0.1); margin-bottom: 15px; }
         .social-group { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
-        .social-item { 
-            width: 50px; height: 50px; border-radius: 15px; background: var(--glass-light); 
-            display: flex; align-items: center; justify-content: center; text-decoration: none;
-            font-size: 24px; border: 1px solid var(--border); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid);
-            transition: 0.3s;
-        }
-        .social-item:active { transform: scale(0.9); background: rgba(255,255,255,0.4); }
+        .social-item { width: 50px; height: 50px; border-radius: 15px; background: var(--glass-light); display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 24px; border: 1px solid var(--border); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); transition: 0.3s; }
+        .social-item:active { transform: scale(0.9); }
 
         .runtime-card { background: rgba(255, 255, 255, 0.5); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 24px; padding: 18px; text-align: center; margin-top: 10px; }
         #runtime-clock { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent); font-size: 15px; }
 
+        /* 弹窗样式 */
         .win-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: none; z-index: 9000; opacity: 0; transition: 0.4s; align-items: center; justify-content: center; }
         .win-mask.show { display: flex; opacity: 1; }
         .win-modal { width: 90%; max-width: 450px; height: 75vh; background: var(--glass-heavy); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 1px solid rgba(255,255,255,0.5); border-radius: 38px; display: flex; flex-direction: column; padding: 25px; transform: scale(0.9) translateY(30px); transition: 0.5s cubic-bezier(0.1, 1, 0.2, 1); overflow: hidden; position: relative; }
-        .win-modal.full { width: 100% !important; height: 100% !important; max-width: none !important; border-radius: 0 !important; transform: none !important; padding: 0 !important; }
-        
-        .win-header { position: relative; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; z-index: 10; }
+        .win-modal.full { width: 100% !important; height: 100% !important; border-radius: 0 !important; transform: none !important; padding: 0 !important; }
+        .win-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; z-index: 10; }
         .win-modal.full .win-header { padding: 12px 20px; margin-bottom: 0; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.2); }
         .read-progress-bar { position: absolute; bottom: -1px; left: 0; height: 3px; background: var(--accent); width: 0%; transition: width 0.1s; display: none; }
         .win-modal.full .read-progress-bar { display: block; }
-
         .win-body { overflow-y: auto; flex: 1; line-height: 1.8; font-size: 17px; color: #1d1d1f; -webkit-overflow-scrolling: touch; }
         .win-modal.full .win-body { padding: 20px; }
         .win-body img { display: block; width: 100%; height: auto; border-radius: 18px; margin: 15px 0; }
-
         #back-to-top { position: absolute; bottom: 30px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 0.5px solid rgba(255, 255, 255, 0.4); display: none; align-items: center; justify-content: center; font-size: 20px; color: var(--accent); z-index: 100; opacity: 0; transition: 0.3s; cursor: pointer; }
         #back-to-top.show { opacity: 1; transform: scale(1); }
 
@@ -96,10 +93,7 @@
 </head>
 <body>
 
-<div class="hero-banner">
-    <div class="welcome-glow" id="glow"></div>
-    <div class="welcome-text">欢迎光临</div>
-</div>
+<div class="hero-banner"></div>
 
 <div class="container">
     <div class="header">
@@ -108,6 +102,11 @@
             <h1 class="site-title">奶龙的个人博客</h1>
         </div>
         <p id="hitokoto" style="font-size:11px; opacity:0.6; margin-top:6px; font-weight:600;">载入中...</p>
+    </div>
+
+    <div class="welcome-area">
+        <div class="welcome-glow"></div>
+        <div class="welcome-text">欢迎光临</div>
     </div>
     
     <div id="p-home" class="page">
@@ -124,17 +123,12 @@
         <div class="posts-container profile-section">
             <img src="https://github.com/nailong78.png" class="profile-avatar-big">
             <h2 style="font-weight:800; letter-spacing:-1px;">奶龙 (Nailong)</h2>
-            <p style="margin-top:10px; opacity:0.6; font-size: 14px; padding: 0 20px;">
-                数字花园的园丁，在这里分享代码、生活与感悟。
-            </p>
-            
             <div class="social-group">
-                <a href="https://github.com/nailong78" target="_blank" class="social-item" title="GitHub">🐱</a>
-                <a href="https://t.me/NL78991" target="_blank" class="social-item" title="Telegram">✈️</a>
+                <a href="https://github.com/nailong78" target="_blank" class="social-item">🐱</a>
+                <a href="https://t.me/NL78991" target="_blank" class="social-item">✈️</a>
             </div>
-
             <div class="glass-card" style="text-align:left; margin-top:30px; cursor:default;">
-                <p style="font-size:13px; font-weight:700; color:var(--accent); margin-bottom:8px;">🚀 国内/微信加速访问：</p>
+                <p style="font-size:13px; font-weight:700; color:var(--accent); margin-bottom:8px;">🚀 加速访问地址：</p>
                 <div style="background:rgba(0,0,0,0.03); padding:10px; border-radius:12px; font-family:monospace; font-size:11px; word-break:break-all;">
                     https://cdn.jsdelivr.net/gh/nailong78/nailong78.github.io@main/index.html
                 </div>
@@ -171,7 +165,6 @@
 <script>
     const user = "nailong78", repo = "nailong78.github.io";
 
-    // 格式解析引擎
     const parseContent = (text) => {
         const urlRegex = /(https?:\/\/[^\s]+|data:image\/[a-zA-Z]+;base64,[^\s]+)/gi;
         let html = text.replace(urlRegex, (match) => {
@@ -207,7 +200,7 @@
         const m = document.getElementById('win-mask'), b = document.getElementById('win-body'), modal = document.getElementById('win-modal');
         document.getElementById('win-title').innerText = title; modal.classList.remove('full');
         document.getElementById('read-progress').style.width = '0%';
-        b.innerHTML = parseContent(content);
+        b.innerHTML = parseContent(content.replace(/^(日期：|作者：).*\n?/gm, ''));
         document.getElementById('win-footer').style.display = isNotice ? 'block' : 'none';
         m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 50);
     };
@@ -225,8 +218,13 @@
                 const list = document.getElementById('post-list');
                 for(const f of data.filter(f => f.name.endsWith('.txt'))) {
                     const r = await fetch(`posts/${f.name}?v=`+Date.now()), text = await r.text();
+                    const dMatch = text.match(/^日期：(.*)$/m), aMatch = text.match(/^作者：(.*)$/m);
                     const card = document.createElement('div'); card.className = 'glass-card';
-                    card.innerHTML = `<h3 style="font-size:18px;">${f.name.replace('.txt','')}</h3><div class="post-meta"><span>📅 点击阅读文章</span></div>`;
+                    card.innerHTML = `<h3 style="font-size:18px;">${f.name.replace('.txt','')}</h3>
+                        <div class="post-info">
+                            ${dMatch ? `<span class="post-tag">📅 ${dMatch[1]}</span>` : ''}
+                            ${aMatch ? `<span class="post-tag">✍️ ${aMatch[1]}</span>` : ''}
+                        </div>`;
                     card.onclick = () => openWin(f.name.replace('.txt',''), text);
                     list.appendChild(card);
                 }
