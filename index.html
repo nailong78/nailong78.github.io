@@ -19,6 +19,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; background: var(--bg-color); color: var(--text-main); min-height: 100vh; overflow-x: hidden; padding-bottom: 110px; transition: background 0.6s ease; }
         
+        /* 动态背景 */
         .background-blob { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; filter: blur(60px); }
         .blob { position: absolute; border-radius: 50%; width: 250px; height: 250px; animation: move 20s infinite alternate linear; }
         .blob-1 { top: -5%; left: -5%; background: var(--blob-1); }
@@ -33,10 +34,27 @@
         #hitokoto { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
         .theme-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; }
 
-        /* 头像模块 */
+        /* --- 果冻头像模块 --- */
         .profile-card { text-align: center; margin-bottom: 25px; }
-        .avatar { width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--glass-border); margin-bottom: 12px; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .avatar:hover { transform: scale(1.05) rotate(5deg); }
+        .avatar-wrapper { display: inline-block; position: relative; cursor: pointer; }
+        .avatar { 
+            width: 85px; height: 85px; border-radius: 50%; 
+            border: 3px solid var(--glass-border); 
+            margin-bottom: 12px; 
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: block;
+        }
+        /* 点击时的果冻动画类 */
+        .jello { animation: jello-anim 0.6s both; }
+        @keyframes jello-anim {
+            0% { transform: scale3d(1, 1, 1); }
+            30% { transform: scale3d(1.25, 0.75, 1); }
+            40% { transform: scale3d(0.75, 1.25, 1); }
+            50% { transform: scale3d(1.15, 0.85, 1); }
+            65% { transform: scale3d(0.95, 1.05, 1); }
+            75% { transform: scale3d(1.05, 0.95, 1); }
+            100% { transform: scale3d(1, 1, 1); }
+        }
 
         /* 卡片与网格 */
         .glass-card { background: var(--glass-bg); backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 28px; padding: 22px; margin-bottom: 15px; transition: 0.3s cubic-bezier(0.2, 0, 0, 1); }
@@ -66,7 +84,9 @@
 
         <div id="main-content" class="page">
             <div class="profile-card">
-                <img src="https://github.com/nailong78.png" class="avatar">
+                <div class="avatar-wrapper" id="avatarTrigger">
+                    <img src="https://github.com/nailong78.png" class="avatar" id="avatarImg">
+                </div>
                 <h2 style="font-size: 22px; font-weight: 800;">奶龙</h2>
                 <p style="font-size: 13px; opacity: 0.5; margin-top: 4px;">数字游民 / 审美驱动开发者</p>
             </div>
@@ -98,7 +118,28 @@
     <script>
         const user = "nailong78", repo = "nailong78.github.io";
 
-        // 主题同步核心逻辑
+        // --- 果冻头像点击逻辑 ---
+        const avatarTrigger = document.getElementById('avatarTrigger');
+        const avatarImg = document.getElementById('avatarImg');
+
+        avatarTrigger.addEventListener('click', () => {
+            // 触发震动 (iOS 暂不支持 navigator.vibrate, 安卓 Chrome 支持)
+            if (navigator.vibrate) {
+                navigator.vibrate(10); // 10毫秒短促震动
+            }
+
+            // 添加动画类，先移除确保能重复触发
+            avatarImg.classList.remove('jello');
+            void avatarImg.offsetWidth; // 触发重绘
+            avatarImg.classList.add('jello');
+
+            // 动画结束后自动移除类名
+            setTimeout(() => {
+                avatarImg.classList.remove('jello');
+            }, 600);
+        });
+
+        // 主题同步逻辑
         function applyTheme() {
             let mode = localStorage.getItem('blog-mode') || 'auto';
             const isNight = new Date().getHours() >= 18 || new Date().getHours() < 6;
@@ -114,9 +155,8 @@
             applyTheme();
         };
 
-        // 自动化列表
+        // 自动化列表加载
         async function loadData() {
-            // 获取文章
             const pRes = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/posts`);
             if (pRes.ok) {
                 const data = await pRes.json();
@@ -131,7 +171,6 @@
                         </a>`;
                 });
             }
-            // 获取应用
             const aRes = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/apps`);
             if (aRes.ok) {
                 const data = await aRes.json();
