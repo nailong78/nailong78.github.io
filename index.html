@@ -8,174 +8,120 @@
         :root {
             --bg-color: #050505; --text-main: #ffffff; --text-sub: rgba(255, 255, 255, 0.5);
             --glass: rgba(255, 255, 255, 0.1); --glass-border: rgba(255, 255, 255, 0.15);
-            --accent: #0A84FF; --modal-bg: rgba(30, 30, 32, 0.85);
+            --accent: #0A84FF; --modal-bg: rgba(30, 30, 32, 0.9);
         }
         body.light-mode {
             --bg-color: #F2F2F7; --text-main: #000000; --text-sub: rgba(0, 0, 0, 0.5);
             --glass: rgba(0, 0, 0, 0.05); --glass-border: rgba(0, 0, 0, 0.1);
-            --modal-bg: rgba(255, 255, 255, 0.85);
+            --modal-bg: rgba(255, 255, 255, 0.9);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg-color); color: var(--text-main); height: 100vh; overflow: hidden; transition: background 0.5s; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg-color); color: var(--text-main); height: 100vh; overflow: hidden; transition: 0.5s; }
 
         .container { height: 100vh; overflow-y: auto; padding: 20px 20px 140px; scroll-behavior: smooth; }
-        
-        /* 顶部导航 */
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .glass-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(25px); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-
-        /* 果冻头像动画 */
-        .avatar-container { text-align: center; margin-bottom: 40px; }
-        .avatar { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--glass-border); cursor: pointer; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .avatar:active { transform: scale(0.85) rotate(-5deg); }
+        
+        /* 头像果冻 */
+        .avatar { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--glass-border); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); margin-bottom: 10px; }
         .jello { animation: jello-anim 0.7s both; }
         @keyframes jello-anim {
-            0% { transform: scale(1, 1); } 30% { transform: scale(1.25, 0.75); }
-            40% { transform: scale(0.75, 1.25); } 50% { transform: scale(1.15, 0.85); }
-            65% { transform: scale(0.95, 1.05); } 75% { transform: scale(1.05, 0.95); } 100% { transform: scale(1, 1); }
+            0% { transform: scale(1); } 30% { transform: scale(1.2, 0.8); }
+            50% { transform: scale(0.8, 1.2); } 100% { transform: scale(1); }
         }
 
-        /* 文章卡片过渡动画 */
-        .post-card { 
-            background: var(--glass); border: 1px solid var(--glass-border); border-radius: 26px; padding: 22px; 
-            margin-bottom: 16px; backdrop-filter: blur(20px); cursor: pointer; 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: center center;
+        /* 液态弹窗通用样式 */
+        .liquid-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(20px); display: none; z-index: 3000; opacity: 0; transition: 0.4s; }
+        .liquid-modal { 
+            position: fixed; top: 50%; left: 50%; width: 92%; max-width: 500px; height: 80vh;
+            background: var(--modal-bg); border-radius: 40px; border: 1px solid var(--glass-border);
+            transform: translate(-50%, -50%) scale(0.85); opacity: 0; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+            z-index: 3100; padding: 30px; display: flex; flex-direction: column;
         }
-        .post-card:active { transform: scale(0.95); opacity: 0.8; }
+        .liquid-overlay.show { display: block; opacity: 1; }
+        .liquid-modal.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
-        /* 文章液态弹窗 */
-        .article-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(15px); display: none; z-index: 3000; opacity: 0; transition: 0.4s; }
-        .article-modal { 
-            position: fixed; top: 50%; left: 50%; width: 90%; max-width: 400px; height: 75vh;
-            background: var(--modal-bg); border-radius: 35px; border: 1px solid var(--glass-border);
-            transform: translate(-50%, -50%) scale(0.8); opacity: 0; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1);
-            z-index: 3100; padding: 30px; display: flex; flex-direction: column; overflow: hidden;
-        }
-        .article-overlay.show { display: block; opacity: 1; }
-        .article-modal.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        .modal-content { overflow-y: auto; margin-top: 20px; font-size: 16px; line-height: 1.8; color: var(--text-main); }
+        /* 编辑器专用 */
+        .editor-input { width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 20px; font-weight: 700; margin-bottom: 15px; outline: none; }
+        .editor-area { width: 100%; flex: 1; background: rgba(128,128,128,0.05); border-radius: 20px; padding: 15px; border: none; color: var(--text-main); font-size: 16px; line-height: 1.6; resize: none; outline: none; }
 
-        /* 底部 Dock */
-        .dock { 
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
-            background: var(--glass); backdrop-filter: blur(40px); border: 1px solid var(--glass-border);
-            border-radius: 38px; display: flex; align-items: center; padding: 8px 12px; z-index: 2000;
-        }
+        /* 卡片 & 按钮 */
+        .glass-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 28px; padding: 22px; margin-bottom: 16px; backdrop-filter: blur(20px); cursor: pointer; transition: 0.3s; }
+        .glass-card:active { transform: scale(0.96); }
+        .btn-action { width: 100%; padding: 16px; border-radius: 20px; border: none; background: var(--accent); color: white; font-weight: 700; margin-top: 15px; cursor: pointer; transition: 0.3s; }
+
+        /* Dock */
+        .dock { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--glass); backdrop-filter: blur(40px); border: 1px solid var(--glass-border); border-radius: 35px; display: flex; padding: 6px 12px; z-index: 2000; }
         .dock-item { display: flex; flex-direction: column; align-items: center; width: 65px; opacity: 0.4; transition: 0.3s; }
-        .dock-item.active { opacity: 1; transform: translateY(-4px); }
-        .dock-icon { font-size: 22px; margin-bottom: 3px; }
-        .dock-text { font-size: 10px; font-weight: 700; }
-        .dock-sep { width: 1px; height: 28px; background: var(--glass-border); margin: 0 10px; }
+        .dock-item.active { opacity: 1; transform: translateY(-3px); }
+        .dock-sep { width: 1px; height: 30px; background: var(--glass-border); margin: 0 8px; align-self: center; }
 
-        /* 应用布局 */
-        .app-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 10px; }
-        .app-card { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: inherit; transition: 0.3s; }
-        .app-card:active { transform: scale(0.9); }
-        .app-icon { width: 66px; height: 66px; background: var(--glass); border-radius: 20px; border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-
-        /* 主题菜单勾选 */
-        .theme-menu { position: absolute; top: 75px; right: 20px; width: 130px; background: var(--glass); backdrop-filter: blur(40px); border-radius: 20px; border: 1px solid var(--glass-border); padding: 5px; display: none; z-index: 4000; }
-        .menu-item { padding: 12px 15px; border-radius: 14px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
-        .menu-item.active { color: var(--accent); }
-        .menu-item.active::after { content: '✓'; font-weight: bold; }
-
-        /* 登录与管理弹窗 */
-        .login-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(20px); display: none; align-items: center; justify-content: center; z-index: 5000; }
-        .input-group { width: 100%; max-width: 280px; background: var(--modal-bg); border-radius: 30px; padding: 30px; border: 1px solid var(--glass-border); text-align: center; }
-        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 15px; border: 1px solid var(--glass-border); background: rgba(128,128,128,0.1); color: var(--text-main); outline: none; }
-        .btn-action { width: 100%; padding: 14px; border-radius: 15px; border: none; background: var(--accent); color: white; font-weight: 700; margin-top: 10px; cursor: pointer; }
+        .app-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .app-icon { width: 66px; height: 66px; background: var(--glass); border-radius: 20px; border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 8px; }
     </style>
 </head>
-<body class="dark-mode">
+<body>
 
     <div class="container">
         <div class="top-bar">
-            <div><h1 style="font-size:22px; font-weight:800;">奶龙的个人博客</h1><p id="hitokoto" style="font-size:11px; opacity:0.5;"></p></div>
-            <div class="glass-btn" onclick="toggleThemeMenu()">🌓</div>
+            <div><h1 style="font-size:22px;">奶龙的个人博客</h1><p id="hitokoto" style="font-size:11px; opacity:0.5;"></p></div>
+            <div class="glass-card" style="padding:10px; border-radius:12px;" onclick="toggleThemeMenu()">🌓</div>
         </div>
 
         <div id="page-home" class="page-sec">
-            <div class="avatar-container"><img src="https://github.com/nailong78.png" id="avatar" class="avatar" onclick="playJello()"></div>
+            <div style="text-align:center; margin-bottom:30px;"><img src="https://github.com/nailong78.png" id="avatar" class="avatar" onclick="playJello()"></div>
             <div id="post-list"></div>
         </div>
 
-        <div id="page-app" class="page-sec" style="display:none;">
-            <div class="app-grid" id="app-list"></div>
-        </div>
-
-        <div id="page-about" class="page-sec" style="display:none;">
-            <div class="post-card"><h3>关于实验室</h3><p style="margin-top:10px; opacity:0.6;">iOS 26 设计规范实践基地。</p></div>
-        </div>
+        <div id="page-app" class="page-sec" style="display:none;"><div class="app-grid" id="app-list"></div></div>
 
         <div id="page-me" class="page-sec" style="display:none;">
-            <div class="post-card" style="text-align:center;">
+            <div class="glass-card" style="text-align:center;">
                 <h2 id="meTitle">未登录</h2>
-                <div id="adminTools" style="display:none; margin-top:20px; border-top:1px solid var(--glass-border); padding-top:20px;">
-                    <button class="btn-action" onclick="window.open('https://github.com/nailong78/nailong78.github.io/new/main/posts')">📝 发布新文章</button>
-                    <button class="btn-action" style="background:var(--glass)" onclick="alert('用户权限已同步')">👥 管理用户列表</button>
+                <div id="adminArea" style="display:none; margin-top:20px; border-top:1px solid var(--glass-border); padding-top:20px;">
+                    <button class="btn-action" onclick="openEditor()">📝 发布新文章 (Markdown)</button>
                 </div>
-                <button class="btn-action" style="background:#ff3b30; margin-top:20px;" onclick="logout()">安全退出</button>
+                <button class="btn-action" style="background:#ff3b30;" onclick="logout()">安全退出</button>
             </div>
         </div>
     </div>
 
     <div class="dock">
-        <div class="dock-item active" onclick="navTo('home', this)"><span class="dock-icon">🏠</span><span class="dock-text">首页</span></div>
-        <div class="dock-item" onclick="navTo('app', this)"><span class="dock-icon">🚀</span><span class="dock-text">应用</span></div>
-        <div class="dock-item" onclick="navTo('about', this)"><span class="dock-icon">ℹ️</span><span class="dock-text">关于</span></div>
+        <div class="dock-item active" onclick="navTo('home', this)"><span>🏠</span><span style="font-size:10px; font-weight:700;">首页</span></div>
+        <div class="dock-item" onclick="navTo('app', this)"><span>🚀</span><span style="font-size:10px; font-weight:700;">应用</span></div>
         <div class="dock-sep"></div>
-        <div id="dock-user" class="dock-item" onclick="handleUserClick(this)"><span class="dock-icon">👤</span><span class="dock-text">登录</span></div>
+        <div id="dock-user" class="dock-item" onclick="handleUserClick(this)"><span>👤</span><span style="font-size:10px; font-weight:700;">登录</span></div>
     </div>
 
-    <div class="theme-menu" id="themeMenu">
-        <div class="menu-item" onclick="setTheme('auto')" id="m-auto">自动</div>
-        <div class="menu-item" onclick="setTheme('light')" id="m-light">亮色</div>
-        <div class="menu-item" onclick="setTheme('dark')" id="m-dark">暗色</div>
-    </div>
-
-    <div class="article-overlay" id="overlay" onclick="closeArticle()"></div>
-    <div class="article-modal" id="modal">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 id="m-title" style="font-size:20px;">标题</h2>
-            <div class="glass-btn" style="width:36px; height:36px; color:#ff3b30;" onclick="closeArticle()">✕</div>
+    <div class="liquid-overlay" id="editorOverlay"></div>
+    <div class="liquid-modal" id="editorModal">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <span style="font-weight:800; opacity:0.6;">新建文章</span>
+            <span style="color:#ff3b30; font-weight:800; cursor:pointer;" onclick="closeEditor()">关闭</span>
         </div>
-        <div class="modal-content" id="m-content">内容加载中...</div>
+        <input type="text" id="postTitle" class="editor-input" placeholder="输入文章标题...">
+        <textarea id="postContent" class="editor-area" placeholder="在这里写 Markdown 内容..."></textarea>
+        <button class="btn-action" onclick="publishPost()">同步至云端仓库</button>
     </div>
 
-    <div class="login-modal" id="loginModal">
-        <div class="input-group">
-            <h3 id="l-title">身份验证</h3>
-            <div id="l-normal"><input type="text" id="u-in" placeholder="用户名"><button class="btn-action" onclick="doLogin()">进入</button></div>
-            <div id="l-admin" style="display:none;"><input type="password" id="a-in" placeholder="管理员密钥"><button class="btn-action" onclick="doAdmin()">验证</button></div>
-            <p style="margin-top:15px; font-size:12px; opacity:0.5;" onclick="toggleAdmin()">管理员切换</p>
-            <p style="margin-top:15px; font-size:12px; opacity:0.5;" onclick="closeLogin()">取消</p>
+    <div class="liquid-overlay" id="readOverlay" onclick="closeRead()"></div>
+    <div class="liquid-modal" id="readModal">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h2 id="readTitle" style="font-size:20px;">标题</h2>
+            <span style="color:var(--accent); font-weight:800; cursor:pointer;" onclick="closeRead()">✕</span>
         </div>
+        <div id="readContent" style="overflow-y:auto; flex:1; line-height:1.8;"></div>
     </div>
 
     <script>
         const user = "nailong78", repo = "nailong78.github.io";
 
-        // 头像果冻效果
         function playJello() {
             const a = document.getElementById('avatar');
             a.classList.remove('jello'); void a.offsetWidth; a.classList.add('jello');
             if(navigator.vibrate) navigator.vibrate(10);
         }
 
-        // 主题系统
-        function setTheme(m) {
-            localStorage.setItem('blog-mode', m); applyTheme();
-            document.getElementById('themeMenu').style.display = 'none';
-        }
-        function applyTheme() {
-            const m = localStorage.getItem('blog-mode') || 'auto';
-            const isDark = m === 'dark' || (m === 'auto' && (new Date().getHours() >= 18 || new Date().getHours() < 6));
-            document.body.classList.toggle('light-mode', !isDark);
-            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
-            document.getElementById('m-'+m).classList.add('active');
-        }
-
-        // 导航系统
+        // 导航
         function navTo(p, el) {
             document.querySelectorAll('.page-sec').forEach(s => s.style.display = 'none');
             document.getElementById('page-'+p).style.display = 'block';
@@ -183,63 +129,60 @@
             el.classList.add('active');
         }
 
-        // 文章非线性弹窗
-        async function openArticle(name) {
-            const modal = document.getElementById('modal');
-            const overlay = document.getElementById('overlay');
-            document.getElementById('m-title').innerText = name.replace('.txt','');
-            document.getElementById('m-content').innerText = "读取加密协议...";
-            
-            overlay.style.display = 'block';
-            modal.style.display = 'flex';
-            setTimeout(() => { overlay.classList.add('show'); modal.classList.add('show'); }, 10);
+        // 编辑器逻辑
+        function openEditor() {
+            const o = document.getElementById('editorOverlay'), m = document.getElementById('editorModal');
+            o.style.display = 'block'; m.style.display = 'flex';
+            setTimeout(() => { o.classList.add('show'); m.classList.add('show'); }, 10);
+        }
+        function closeEditor() {
+            const o = document.getElementById('editorOverlay'), m = document.getElementById('editorModal');
+            o.classList.remove('show'); m.classList.remove('show');
+            setTimeout(() => { o.style.display = 'none'; m.style.display = 'none'; }, 400);
+        }
+        function publishPost() {
+            const title = document.getElementById('postTitle').value;
+            const content = document.getElementById('postContent').value;
+            if(!title || !content) return alert("请填写标题和内容");
+            // 构建 GitHub 新建文件 URL
+            const fileName = `${title}.txt`;
+            const encodedContent = encodeURIComponent(content);
+            const githubUrl = `https://github.com/${user}/${repo}/new/main/posts?filename=${encodeURIComponent(fileName)}&value=${encodedContent}`;
+            window.open(githubUrl, '_blank');
+        }
 
+        // 阅读逻辑
+        async function openRead(name) {
+            const o = document.getElementById('readOverlay'), m = document.getElementById('readModal');
+            document.getElementById('readTitle').innerText = name.replace('.txt','');
+            document.getElementById('readContent').innerText = "加载中...";
+            o.style.display = 'block'; m.style.display = 'flex';
+            setTimeout(() => { o.classList.add('show'); m.classList.add('show'); }, 10);
             const res = await fetch(`posts/${name}`);
-            document.getElementById('m-content').innerText = await res.text();
+            document.getElementById('readContent').innerText = await res.text();
         }
-        function closeArticle() {
-            const m = document.getElementById('modal');
-            const o = document.getElementById('overlay');
-            m.classList.remove('show'); o.classList.remove('show');
-            setTimeout(() => { m.style.display = 'none'; o.style.display = 'none'; }, 400);
+        function closeRead() {
+            const o = document.getElementById('readOverlay'), m = document.getElementById('readModal');
+            o.classList.remove('show'); m.classList.remove('show');
+            setTimeout(() => { o.style.display = 'none'; m.style.display = 'none'; }, 400);
         }
 
-        // 登录管理
-        function handleUserClick(el) {
-            if(!localStorage.getItem('user')) document.getElementById('loginModal').style.display = 'flex';
-            else navTo('me', el);
-        }
-        function toggleAdmin() {
-            const n = document.getElementById('l-normal'), a = document.getElementById('l-admin');
-            n.style.display = n.style.display==='none'?'block':'none';
-            a.style.display = a.style.display==='none'?'block':'none';
-        }
-        function doLogin() { store(document.getElementById('u-in').value || "访客", false); }
-        function doAdmin() {
-            if(document.getElementById('a-in').value === 'admin') store("奶龙", true);
-            else alert("密钥错误");
-        }
-        function store(u, a) { localStorage.setItem('user', u); localStorage.setItem('isAdmin', a); location.reload(); }
-        function logout() { localStorage.clear(); location.reload(); }
-        function closeLogin() { document.getElementById('loginModal').style.display='none'; }
-
-        // 数据驱动
-        async function load() {
-            applyTheme();
-            // 文章
+        // 初始化
+        async function init() {
+            // 加载文章
             const pRes = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/posts`);
             if(pRes.ok) {
                 const data = await pRes.json();
                 const list = document.getElementById('post-list');
                 data.filter(f => f.name.endsWith('.txt')).forEach(file => {
                     const card = document.createElement('div');
-                    card.className = 'post-card';
-                    card.innerHTML = `<h3>${file.name.replace('.txt','')}</h3><p style="font-size:12px; opacity:0.4; margin-top:8px;">点击展开</p>`;
-                    card.onclick = () => openArticle(file.name);
+                    card.className = 'glass-card';
+                    card.innerHTML = `<h3>${file.name.replace('.txt','')}</h3><p style="font-size:12px; opacity:0.4; margin-top:8px;">点击阅读全文</p>`;
+                    card.onclick = () => openRead(file.name);
                     list.appendChild(card);
                 });
             }
-            // 应用 (修复跳转路径)
+            // 加载应用
             const aRes = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/apps`);
             if(aRes.ok) {
                 const data = await aRes.json();
@@ -247,20 +190,28 @@
                 data.forEach(f => {
                     const isPy = f.name.endsWith('.py');
                     const url = isPy ? `python_runner.html?file=${f.name}` : `apps/${f.name}`;
-                    list.innerHTML += `<a href="${url}" class="app-card"><div class="app-icon">${isPy?'🐍':'🌐'}</div><span style="font-size:11px; font-weight:700;">${f.name.split('.')[0]}</span></a>`;
+                    list.innerHTML += `<a href="${url}" style="text-decoration:none; color:inherit;"><div class="glass-card" style="text-align:center;"><div class="app-icon">${isPy?'🐍':'🌐'}</div><span style="font-size:11px; font-weight:700;">${f.name.split('.')[0]}</span></div></a>`;
                 });
             }
-            // 状态同步
-            const savedU = localStorage.getItem('user');
-            if(savedU) {
-                document.getElementById('dock-user').querySelector('.dock-text').innerText = "中心";
-                document.getElementById('meTitle').innerText = "你好，" + savedU;
-                if(localStorage.getItem('isAdmin') === 'true') document.getElementById('adminTools').style.display = 'block';
+            // 登录态
+            if(localStorage.getItem('user')) {
+                document.getElementById('dock-user').querySelector('span:last-child').innerText = "中心";
+                document.getElementById('meTitle').innerText = "你好，" + localStorage.getItem('user');
+                if(localStorage.getItem('isAdmin') === 'true') document.getElementById('adminArea').style.display = 'block';
             }
         }
 
-        function toggleThemeMenu() { const m = document.getElementById('themeMenu'); m.style.display = m.style.display==='flex'?'none':'flex'; }
-        window.onload = load;
+        function handleUserClick(el) {
+            if(!localStorage.getItem('user')) {
+                const u = prompt("请输入用户名");
+                if(u === 'admin') { localStorage.setItem('user','奶龙'); localStorage.setItem('isAdmin','true'); }
+                else if(u) { localStorage.setItem('user', u); }
+                location.reload();
+            } else navTo('me', el);
+        }
+        function logout() { localStorage.clear(); location.reload(); }
+        
+        window.onload = init;
         fetch('https://v1.hitokoto.cn?c=e').then(res=>res.json()).then(d=>document.getElementById('hitokoto').innerText = d.hitokoto);
     </script>
 </body>
