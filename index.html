@@ -7,14 +7,16 @@
     <style>
         :root {
             --bg-color: #050505; --text-main: #ffffff; --text-sub: rgba(255, 255, 255, 0.5);
-            --glass-bg: rgba(255, 255, 255, 0.08); --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.08); --glass-border: rgba(255, 255, 255, 0.12);
             --blob-1: rgba(120, 0, 255, 0.3); --blob-2: rgba(0, 100, 255, 0.3);
+            --accent: #0A84FF;
         }
 
         body.light-mode {
             --bg-color: #f2f4f6; --text-main: #1a1a1a; --text-sub: rgba(0, 0, 0, 0.5);
             --glass-bg: rgba(255, 255, 255, 0.6); --glass-border: rgba(255, 255, 255, 0.8);
             --blob-1: rgba(255, 100, 200, 0.2); --blob-2: rgba(0, 200, 255, 0.2);
+            --accent: #007AFF;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -22,11 +24,10 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             background-color: var(--bg-color); color: var(--text-main);
-            min-height: 100vh; transition: background 0.6s ease;
+            min-height: 100vh; transition: background 0.8s cubic-bezier(0.2, 0, 0, 1);
             overflow-x: hidden; padding-bottom: 100px;
         }
 
-        /* 极致流畅背景：使用 will-change 优化 */
         .background-blob { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; filter: blur(60px); will-change: transform; }
         .blob { position: absolute; border-radius: 50%; animation: move 20s infinite alternate linear; }
         .blob-1 { top: -5%; left: -5%; width: 250px; height: 250px; background: var(--blob-1); }
@@ -35,49 +36,42 @@
 
         .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 15px 20px; }
 
-        /* 顶部导航：标题 + 每日一言 + 开关 */
-        .top-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            height: 48px; margin-bottom: 25px;
-        }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; height: 48px; margin-bottom: 25px; }
         .header-info { display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
         .site-title { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
-        #hitokoto { 
-            font-size: 11px; color: var(--text-sub); 
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-            margin-top: 2px; max-width: 260px;
-        }
+        #hitokoto { font-size: 11px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; max-width: 240px; }
 
         .theme-control { position: relative; }
         .theme-btn {
-            width: 44px; height: 44px; border-radius: 16px; /* iOS 26 矩形圆角 */
+            width: 44px; height: 44px; border-radius: 14px;
             background: var(--glass-bg); border: 1px solid var(--glass-border);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             display: flex; align-items: center; justify-content: center; font-size: 18px;
-            cursor: pointer; z-index: 101; transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+            cursor: pointer; z-index: 101; transition: transform 0.4s cubic-bezier(0.15, 1, 0.3, 1);
         }
+        .theme-btn:active { transform: scale(0.85); }
 
-        /* 弹出菜单优化 */
         .theme-menu {
             position: absolute; top: 55px; right: 0; width: 150px;
-            background: var(--glass-bg); backdrop-filter: blur(40px) saturate(180%);
-            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            background: var(--glass-bg); backdrop-filter: blur(40px) saturate(200%);
+            -webkit-backdrop-filter: blur(40px) saturate(200%);
             border: 1px solid var(--glass-border); border-radius: 20px;
             padding: 6px; display: none; flex-direction: column; z-index: 102;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            animation: ios-pop 0.4s cubic-bezier(0.15, 1, 0.3, 1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            animation: ios-pop 0.5s cubic-bezier(0.15, 1, 0.3, 1);
         }
         @keyframes ios-pop {
-            from { opacity: 0; transform: scale(0.8) translateY(-10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+            from { opacity: 0; transform: scale(0.7) translateY(-20px); filter: blur(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
         }
         .menu-item {
-            padding: 10px 14px; border-radius: 14px; font-size: 13px; font-weight: 500;
-            cursor: pointer; transition: background 0.2s;
+            padding: 12px 14px; border-radius: 14px; font-size: 13px; font-weight: 500;
+            cursor: pointer; transition: background 0.2s; display: flex; justify-content: space-between; align-items: center;
         }
         .menu-item:active { background: rgba(255,255,255,0.15); }
+        .menu-item .check-mark { color: var(--accent); font-weight: bold; opacity: 0; transition: 0.2s; }
+        .menu-item.active .check-mark { opacity: 1; }
 
-        /* 通用卡片 */
         .glass-card {
             background: var(--glass-bg); backdrop-filter: blur(25px) saturate(150%);
             -webkit-backdrop-filter: blur(25px) saturate(150%);
@@ -85,11 +79,7 @@
             padding: 22px; margin-bottom: 18px; transform: translate3d(0,0,0);
         }
 
-        /* 隐藏逻辑 */
-        .hidden { display: none; opacity: 0; }
-        #main-content, #about-content { transition: opacity 0.3s ease; }
-
-        /* 底部Dock */
+        .hidden { display: none; }
         .dock {
             position: fixed; bottom: 25px; left: 50%; transform: translate3d(-50%, 0, 0);
             background: var(--glass-bg); backdrop-filter: blur(30px);
@@ -97,7 +87,7 @@
             padding: 10px 35px; border-radius: 100px; display: flex; gap: 40px; z-index: 99;
         }
         .dock-item { font-size: 13px; font-weight: 600; opacity: 0.4; transition: 0.3s; cursor: pointer; }
-        .dock-item.active { opacity: 1; transform: scale(1.1); }
+        .dock-item.active { opacity: 1; transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -111,37 +101,37 @@
         <div class="top-bar">
             <div class="header-info">
                 <span class="site-title">奶龙的个人博客</span>
-                <div id="hitokoto">正在加载科技箴言...</div>
+                <div id="hitokoto">正在读取云端思考...</div>
             </div>
             <div class="theme-control">
                 <div class="theme-btn" id="themeBtn">🌓</div>
                 <div class="theme-menu" id="themeMenu">
-                    <div class="menu-item" data-mode="auto">自动模式</div>
-                    <div class="menu-item" data-mode="light">亮色</div>
-                    <div class="menu-item" data-mode="dark">暗色</div>
+                    <div class="menu-item" data-mode="auto">自动 <span class="check-mark">✓</span></div>
+                    <div class="menu-item" data-mode="light">浅色 <span class="check-mark">✓</span></div>
+                    <div class="menu-item" data-mode="dark">深色 <span class="check-mark">✓</span></div>
                 </div>
             </div>
         </div>
 
         <div id="main-content">
             <div class="glass-card" style="text-align: center;">
-                <img src="https://github.com/nailong78.png" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px;">
-                <h2 style="font-size: 20px;">欢迎回来</h2>
+                <img src="https://github.com/nailong78.png" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px; border: 2px solid var(--glass-border);">
+                <h2 style="font-size: 20px;">数字花园</h2>
             </div>
             <div class="glass-card">
                 <p style="font-size: 14px; opacity: 0.8; line-height: 1.6;">
-                    科技的本质是人类意志的延伸。在这里，我记录对数字世界的思考。
+                    基于 GitHub 零配置构建。探索 Web 高级滤镜与液态视觉的融合。
                 </p>
             </div>
         </div>
 
         <div id="about-content" class="hidden">
             <div class="glass-card">
-                <h3 style="margin-bottom: 10px;">关于本站</h3>
+                <h3 style="margin-bottom: 10px;">关于 Nailong78</h3>
                 <p style="font-size: 14px; line-height: 1.8;">
-                    <b>设计：</b> iOS 26 液态玻璃风格<br>
-                    <b>架构：</b> 纯 GitHub Pages 无本地操作<br>
-                    <b>接口：</b> Hitokoto API 驱动每日一言
+                    <b>身份：</b> 数字游民 / 审美驱动开发者<br>
+                    <b>技术：</b> iOS 26 Design System<br>
+                    <b>格言：</b> 每一个像素都应有其温度。
                 </p>
             </div>
         </div>
@@ -153,31 +143,37 @@
     </div>
 
     <script>
-        // 1. 获取每日一言 (科技类参数: c=e)
-        fetch('https://v1.hitokoto.cn?c=e')
-            .then(response => response.json())
-            .then(data => {
-                const hitokoto = document.getElementById('hitokoto');
-                hitokoto.innerText = `“${data.hitokoto}”`;
-            })
-            .catch(console.error);
+        // 1. 获取每日一言
+        fetch('https://v1.hitokoto.cn?c=e&c=d')
+            .then(res => res.json())
+            .then(data => { document.getElementById('hitokoto').innerText = `“${data.hitokoto}”`; });
 
-        // 2. 主题管理
+        // 2. 主题与打勾逻辑修复
         const themeBtn = document.getElementById('themeBtn');
         const themeMenu = document.getElementById('themeMenu');
-        const body = document.body;
+        const menuItems = document.querySelectorAll('.menu-item');
         let mode = localStorage.getItem('blog-mode') || 'auto';
 
         function applyTheme() {
             const hour = new Date().getHours();
             const isNight = hour >= 18 || hour < 6;
             
+            // 切换主题样式
             if (mode === 'auto') {
-                isNight ? body.classList.remove('light-mode') : body.classList.add('light-mode');
+                isNight ? document.body.classList.remove('light-mode') : document.body.classList.add('light-mode');
             } else {
-                mode === 'light' ? body.classList.add('light-mode') : body.classList.remove('light-mode');
+                mode === 'light' ? document.body.classList.add('light-mode') : document.body.classList.remove('light-mode');
             }
-            themeBtn.innerText = body.classList.contains('light-mode') ? '☀️' : '🌙';
+            themeBtn.innerText = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
+
+            // 修复打勾逻辑：遍历所有项，匹配当前 mode 的项添加 active 类
+            menuItems.forEach(item => {
+                if (item.dataset.mode === mode) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
         }
 
         themeBtn.onclick = (e) => {
@@ -185,7 +181,7 @@
             themeMenu.style.display = themeMenu.style.display === 'flex' ? 'none' : 'flex';
         };
 
-        document.querySelectorAll('.menu-item').forEach(item => {
+        menuItems.forEach(item => {
             item.onclick = function() {
                 mode = this.dataset.mode;
                 localStorage.setItem('blog-mode', mode);
@@ -196,20 +192,12 @@
 
         document.onclick = () => themeMenu.style.display = 'none';
 
-        // 3. 页面切换
-        const navHome = document.getElementById('nav-home');
-        const navAbout = document.getElementById('nav-about');
-        const main = document.getElementById('main-content');
-        const about = document.getElementById('about-content');
+        // 3. 导航切换
+        const main = document.getElementById('main-content'), about = document.getElementById('about-content');
+        const nh = document.getElementById('nav-home'), na = document.getElementById('nav-about');
 
-        navAbout.onclick = () => {
-            main.classList.add('hidden'); about.classList.remove('hidden');
-            navAbout.classList.add('active'); navHome.classList.remove('active');
-        };
-        navHome.onclick = () => {
-            about.classList.add('hidden'); main.classList.remove('hidden');
-            navHome.classList.add('active'); navAbout.classList.remove('active');
-        };
+        na.onclick = () => { main.classList.add('hidden'); about.classList.remove('hidden'); na.classList.add('active'); nh.classList.remove('active'); };
+        nh.onclick = () => { about.classList.add('hidden'); main.classList.remove('hidden'); nh.classList.add('active'); na.classList.remove('active'); };
 
         applyTheme();
     </script>
