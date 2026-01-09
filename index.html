@@ -21,7 +21,7 @@
         .site-title { font-size: 28px; font-weight: 800; letter-spacing: -1.2px; }
 
         .posts-container { background: rgba(255, 255, 255, 0.4); border-radius: 32px; padding: 15px; border: 1px solid var(--border); backdrop-filter: blur(10px); }
-        .container-label { font-size: 13px; font-weight: 700; opacity: 0.5; margin: 0 0 12px 10px; display: block; }
+        .container-label { font-size: 13px; font-weight: 700; opacity: 0.5; margin: 15px 0 12px 10px; display: block; }
 
         .glass-card { 
             background: var(--glass-light); border: 1px solid var(--border); border-radius: 22px; 
@@ -30,14 +30,19 @@
         }
         .glass-card:active { transform: scale(0.97); }
         
-        /* 文章信息样式 */
-        .post-meta { font-size: 12px; opacity: 0.5; margin-top: 8px; font-weight: 500; display: flex; gap: 12px; }
+        /* 运行时间卡片专用 iOS 液态玻璃特效 */
+        .runtime-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 24px; padding: 18px; text-align: center; margin-top: 10px;
+        }
+        #runtime-clock { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent); font-size: 15px; }
 
-        /* 个人空间样式 */
+        .post-meta { font-size: 12px; opacity: 0.5; margin-top: 8px; font-weight: 500; display: flex; gap: 12px; }
         .profile-box { text-align: center; padding: 30px 15px; }
         .profile-avatar { width: 100px; height: 100px; border-radius: 30px; margin-bottom: 15px; border: 4px solid #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         
-        /* 液态玻璃社交按钮 */
         .social-row { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
         .social-btn {
             width: 45px; height: 45px; border-radius: 14px;
@@ -85,6 +90,12 @@
         </div>
         <span class="container-label">文章列表</span>
         <div id="post-list" class="posts-container"></div>
+        
+        <span class="container-label">安全运行</span>
+        <div class="runtime-card">
+            <p style="font-size: 12px; font-weight: 600; opacity: 0.6; margin-bottom: 5px;">本站已安全运行</p>
+            <div id="runtime-clock">正在初始化...</div>
+        </div>
     </div>
 
     <div id="p-about" class="page" style="display:none;">
@@ -139,6 +150,19 @@
     let scale = 1, startDist = 0, startX = 0, lastTouchTime = 0;
     const imgEl = document.getElementById('full-img'), viewer = document.getElementById('img-viewer'), counterEl = document.getElementById('img-counter'), dlBtn = document.getElementById('dl-btn');
 
+    // 运行时间逻辑
+    const updateRuntime = () => {
+        const start = new Date("2026-01-09 21:25:00").getTime();
+        const now = new Date().getTime();
+        const diff = now - start;
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        document.getElementById("runtime-clock").innerText = `${d}天 ${h}时 ${m}分 ${s}秒`;
+    };
+    setInterval(updateRuntime, 1000);
+
     const updateCounter = () => {
         const src = currentImgList[currentImgIndex];
         counterEl.style.display = currentImgList.length > 1 ? 'block' : 'none';
@@ -147,11 +171,9 @@
     };
 
     const downloadCurrentImg = (e) => { e.stopPropagation(); const link = document.createElement('a'); link.href = currentImgList[currentImgIndex]; link.download = `img_${Date.now()}.png`; link.click(); };
-
     viewer.addEventListener('touchstart', e => { lastTouchTime = Date.now(); if (e.touches.length === 2) startDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); else startX = e.touches[0].pageX; });
     viewer.addEventListener('touchmove', e => { if (e.touches.length === 2 && startDist > 0) { const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); scale = Math.min(Math.max(1, dist / startDist), 4); imgEl.style.transform = `scale(${scale})`; } });
     viewer.addEventListener('touchend', e => { if (Date.now() - lastTouchTime > 500) return; if (scale === 1 && e.changedTouches.length === 1) { const endX = e.changedTouches[0].pageX; if (startX - endX > 50) switchImg(1); else if (endX - startX > 50) switchImg(-1); } startDist = 0; });
-
     const switchImg = (dir) => { if (currentImgList.length <= 1) return; currentImgIndex = (currentImgIndex + dir + currentImgList.length) % currentImgList.length; imgEl.style.opacity = 0; setTimeout(() => { imgEl.src = currentImgList[currentImgIndex]; imgEl.style.opacity = 1; updateCounter(); }, 150); };
     const viewImage = (index, list) => { currentImgList = list; currentImgIndex = index; imgEl.src = list[index]; scale = 1; imgEl.style.transform = 'scale(1)'; viewer.style.display = 'flex'; updateCounter(); setTimeout(() => viewer.classList.add('show'), 50); history.pushState({view:'img'}, ''); };
     const closeImageViewer = () => { if(viewer.classList.contains('show')) { viewer.classList.remove('show'); setTimeout(() => viewer.style.display = 'none', 400); if(history.state?.view === 'img') history.back(); } };
@@ -172,7 +194,6 @@
     const openWin = (title, content, isNotice = false) => {
         const m = document.getElementById('win-mask'), b = document.getElementById('win-body');
         document.getElementById('win-title').innerText = title; 
-        // 过滤掉开头的日期和作者行
         const cleanContent = content.replace(/^(日期：|作者：).*\n?/gm, '');
         b.innerHTML = parseContent(cleanContent);
         document.getElementById('win-ctrls').style.display = isNotice ? 'none' : 'flex';
@@ -184,6 +205,7 @@
     const toggleFull = () => document.getElementById('win-modal').classList.toggle('full');
 
     const init = async () => {
+        updateRuntime();
         fetch('announcement/notice.txt?v='+Date.now()).then(r => r.text()).then(t => { if(t.trim()) openWin('公告', t, true); });
         const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/posts?v=`+Date.now());
         if(res.ok) {
@@ -192,20 +214,13 @@
             for(const f of data.filter(f => f.name.endsWith('.txt'))) {
                 const r = await fetch(`posts/${f.name}?v=`+Date.now());
                 const fullText = await r.text();
-                
-                // 提取元数据
                 const dateMatch = fullText.match(/^日期：(.*)$/m);
                 const authorMatch = fullText.match(/^作者：(.*)$/m);
-                
                 const card = document.createElement('div'); card.className = 'glass-card';
                 let metaHtml = '';
                 if(dateMatch || authorMatch) {
-                    metaHtml = `<div class="post-meta">
-                        ${dateMatch ? `<span>📅 ${dateMatch[1]}</span>` : ''}
-                        ${authorMatch ? `<span>✍️ ${authorMatch[1]}</span>` : ''}
-                    </div>`;
+                    metaHtml = `<div class="post-meta">${dateMatch ? `<span>📅 ${dateMatch[1]}</span>` : ''}${authorMatch ? `<span>✍️ ${authorMatch[1]}</span>` : ''}</div>`;
                 }
-                
                 card.innerHTML = `<h3 style="font-size:18px;">${f.name.replace('.txt','')}</h3>${metaHtml}`;
                 card.onclick = () => openWin(f.name.replace('.txt',''), fullText);
                 list.appendChild(card);
