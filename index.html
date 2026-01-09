@@ -30,7 +30,6 @@
         }
         .glass-card:active { transform: scale(0.97); }
         
-        /* 运行时间卡片专用 iOS 液态玻璃特效 */
         .runtime-card {
             background: rgba(255, 255, 255, 0.5);
             backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid);
@@ -56,7 +55,25 @@
 
         .win-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(20px); display: none; z-index: 9000; opacity: 0; transition: 0.4s; align-items: center; justify-content: center; }
         .win-mask.show { display: flex; opacity: 1; }
-        .win-modal { width: 90%; max-width: 450px; height: 75vh; background: var(--glass-heavy); border: 1px solid rgba(255,255,255,0.5); border-radius: 38px; display: flex; flex-direction: column; padding: 25px; transform: scale(0.9) translateY(30px); transition: 0.5s cubic-bezier(0.1, 1, 0.2, 1); }
+        
+        /* 弹窗核心样式 */
+        .win-modal { 
+            width: 90%; max-width: 450px; height: 75vh; 
+            background: var(--glass-heavy); 
+            backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid);
+            border: 1px solid rgba(255,255,255,0.5); border-radius: 38px; 
+            display: flex; flex-direction: column; padding: 25px; 
+            transform: scale(0.9) translateY(30px); transition: 0.5s cubic-bezier(0.1, 1, 0.2, 1); 
+            z-index: 9001;
+        }
+        /* 全屏修复样式 */
+        .win-modal.full { 
+            width: 100% !important; 
+            height: 100% !important; 
+            max-width: none !important; 
+            border-radius: 0 !important; 
+            transform: none !important;
+        }
         .win-mask.show .win-modal { transform: scale(1) translateY(0); }
         .win-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .win-body { overflow-y: auto; flex: 1; line-height: 1.8; font-size: 17px; color: #1d1d1f; }
@@ -118,7 +135,7 @@
 <div class="win-mask" id="win-mask">
     <div class="win-modal" id="win-modal">
         <div class="win-header">
-            <h3 id="win-title" style="font-size:20px;"></h3>
+            <h3 id="win-title" style="font-size:20px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></h3>
             <div style="display:flex; gap:8px;" id="win-ctrls">
                 <div class="glass-btn" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:12px; cursor:pointer;" onclick="toggleFull()">🔳</div>
                 <div class="glass-btn" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:12px; cursor:pointer; color:#FF3B30;" onclick="closeWin()">✕</div>
@@ -150,7 +167,6 @@
     let scale = 1, startDist = 0, startX = 0, lastTouchTime = 0;
     const imgEl = document.getElementById('full-img'), viewer = document.getElementById('img-viewer'), counterEl = document.getElementById('img-counter'), dlBtn = document.getElementById('dl-btn');
 
-    // 运行时间逻辑
     const updateRuntime = () => {
         const start = new Date("2026-01-09 21:25:00").getTime();
         const now = new Date().getTime();
@@ -177,7 +193,10 @@
     const switchImg = (dir) => { if (currentImgList.length <= 1) return; currentImgIndex = (currentImgIndex + dir + currentImgList.length) % currentImgList.length; imgEl.style.opacity = 0; setTimeout(() => { imgEl.src = currentImgList[currentImgIndex]; imgEl.style.opacity = 1; updateCounter(); }, 150); };
     const viewImage = (index, list) => { currentImgList = list; currentImgIndex = index; imgEl.src = list[index]; scale = 1; imgEl.style.transform = 'scale(1)'; viewer.style.display = 'flex'; updateCounter(); setTimeout(() => viewer.classList.add('show'), 50); history.pushState({view:'img'}, ''); };
     const closeImageViewer = () => { if(viewer.classList.contains('show')) { viewer.classList.remove('show'); setTimeout(() => viewer.style.display = 'none', 400); if(history.state?.view === 'img') history.back(); } };
-    window.onpopstate = () => { if (viewer.style.display === 'flex') { viewer.classList.remove('show'); setTimeout(() => viewer.style.display = 'none', 400); } };
+    window.onpopstate = () => { 
+        if (viewer.style.display === 'flex') { viewer.classList.remove('show'); setTimeout(() => viewer.style.display = 'none', 400); } 
+        closeWin();
+    };
 
     const nav = (p, el) => { document.querySelectorAll('.page').forEach(s => s.style.display = 'none'); document.getElementById('p-'+p).style.display = 'block'; document.querySelectorAll('.dock-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); };
 
@@ -192,17 +211,26 @@
     };
 
     const openWin = (title, content, isNotice = false) => {
-        const m = document.getElementById('win-mask'), b = document.getElementById('win-body');
+        const m = document.getElementById('win-mask'), b = document.getElementById('win-body'), modal = document.getElementById('win-modal');
         document.getElementById('win-title').innerText = title; 
+        modal.classList.remove('full'); // 每次打开重置全屏状态
         const cleanContent = content.replace(/^(日期：|作者：).*\n?/gm, '');
         b.innerHTML = parseContent(cleanContent);
         document.getElementById('win-ctrls').style.display = isNotice ? 'none' : 'flex';
         document.getElementById('win-footer').style.display = isNotice ? 'block' : 'none';
         m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 50);
+        history.pushState({view:'post'}, '');
     };
 
-    const closeWin = () => { document.getElementById('win-mask').classList.remove('show'); setTimeout(() => document.getElementById('win-mask').style.display = 'none', 400); };
-    const toggleFull = () => document.getElementById('win-modal').classList.toggle('full');
+    const closeWin = () => { 
+        document.getElementById('win-mask').classList.remove('show'); 
+        setTimeout(() => document.getElementById('win-mask').style.display = 'none', 400); 
+    };
+    
+    // 修复的全屏切换函数
+    const toggleFull = () => {
+        document.getElementById('win-modal').classList.toggle('full');
+    };
 
     const init = async () => {
         updateRuntime();
