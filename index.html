@@ -55,6 +55,18 @@
         }
         .glass-card:active { transform: scale(0.97); }
         
+        /* 关于页面特有样式 */
+        .profile-section { text-align: center; padding: 20px 0; }
+        .profile-avatar-big { width: 90px; height: 90px; border-radius: 28px; border: 4px solid #fff; box-shadow: 0 12px 30px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .social-group { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        .social-item { 
+            width: 50px; height: 50px; border-radius: 15px; background: var(--glass-light); 
+            display: flex; align-items: center; justify-content: center; text-decoration: none;
+            font-size: 24px; border: 1px solid var(--border); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid);
+            transition: 0.3s;
+        }
+        .social-item:active { transform: scale(0.9); background: rgba(255,255,255,0.4); }
+
         .runtime-card { background: rgba(255, 255, 255, 0.5); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 24px; padding: 18px; text-align: center; margin-top: 10px; }
         #runtime-clock { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent); font-size: 15px; }
 
@@ -109,10 +121,24 @@
     </div>
 
     <div id="p-about" class="page" style="display:none;">
-        <div class="posts-container" style="text-align:center; padding:40px 20px;">
-            <img src="https://github.com/nailong78.png" style="width:80px; height:80px; border-radius:24px; margin-bottom:15px; border:3px solid #fff;">
-            <h2 style="font-weight:800;">关于作者</h2>
-            <p style="margin-top:15px; opacity:0.7; line-height:1.6; font-size: 14px;">欢迎来到我的数字花园。<br>在这里分享技术、生活与思考。</p>
+        <div class="posts-container profile-section">
+            <img src="https://github.com/nailong78.png" class="profile-avatar-big">
+            <h2 style="font-weight:800; letter-spacing:-1px;">奶龙 (Nailong)</h2>
+            <p style="margin-top:10px; opacity:0.6; font-size: 14px; padding: 0 20px;">
+                数字花园的园丁，在这里分享代码、生活与感悟。
+            </p>
+            
+            <div class="social-group">
+                <a href="https://github.com/nailong78" target="_blank" class="social-item" title="GitHub">🐱</a>
+                <a href="https://t.me/NL78991" target="_blank" class="social-item" title="Telegram">✈️</a>
+            </div>
+
+            <div class="glass-card" style="text-align:left; margin-top:30px; cursor:default;">
+                <p style="font-size:13px; font-weight:700; color:var(--accent); margin-bottom:8px;">🚀 国内/微信加速访问：</p>
+                <div style="background:rgba(0,0,0,0.03); padding:10px; border-radius:12px; font-family:monospace; font-size:11px; word-break:break-all;">
+                    https://cdn.jsdelivr.net/gh/nailong78/nailong78.github.io@main/index.html
+                </div>
+            </div>
         </div>
     </div>
 </div>
