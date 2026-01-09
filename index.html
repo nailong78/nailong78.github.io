@@ -65,7 +65,6 @@
         .post-info { display: flex; gap: 10px; margin-top: 8px; font-size: 11px; font-weight: 600; opacity: 0.5; }
         .post-tag { background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 6px; }
 
-        /* 分页加载按钮样式 */
         .load-more-btn {
             width: 100%; padding: 16px; margin-top: 10px; border-radius: 20px;
             background: rgba(255, 255, 255, 0.5); border: 1px solid var(--border);
@@ -75,12 +74,6 @@
         }
         .load-more-btn:active { transform: scale(0.98); opacity: 0.8; }
         .load-more-btn.disabled { opacity: 0.4; cursor: default; pointer-events: none; color: #000; }
-
-        .profile-section { text-align: center; padding: 20px 0; }
-        .profile-avatar-big { width: 90px; height: 90px; border-radius: 28px; border: 4px solid #fff; box-shadow: 0 12px 30px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        .social-group { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
-        .social-item { width: 50px; height: 50px; border-radius: 15px; background: var(--glass-light); display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 24px; border: 1px solid var(--border); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); transition: 0.3s; }
-        .social-item:active { transform: scale(0.9); }
 
         .runtime-card { background: rgba(255, 255, 255, 0.5); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 24px; padding: 18px; text-align: center; margin-top: 10px; }
         #runtime-clock { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent); font-size: 15px; }
@@ -95,7 +88,7 @@
         .win-modal.full .read-progress-bar { display: block; }
         .win-body { overflow-y: auto; flex: 1; line-height: 1.8; font-size: 17px; color: #1d1d1f; -webkit-overflow-scrolling: touch; }
         .win-modal.full .win-body { padding: 20px; }
-        .win-body img { display: block; width: 100%; height: auto; border-radius: 18px; margin: 15px 0; }
+        .win-body img { display: block; width: 100%; height: auto; border-radius: 18px; margin: 15px 0; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
         #back-to-top { position: absolute; bottom: 30px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 0.5px solid rgba(255, 255, 255, 0.4); display: none; align-items: center; justify-content: center; font-size: 20px; color: var(--accent); z-index: 100; opacity: 0; transition: 0.3s; cursor: pointer; }
         #back-to-top.show { opacity: 1; transform: scale(1); }
 
@@ -200,13 +193,6 @@
     let allPosts = [], currentPostIndex = 0;
     const POSTS_PER_PAGE = 6;
 
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        requestAnimationFrame(() => {
-            document.getElementById('parallax-bg').style.transform = `translateY(${scrolled * 0.2}px)`;
-        });
-    });
-
     const createRipple = (event, element) => {
         const ripple = document.createElement("span");
         ripple.classList.add("ripple");
@@ -219,44 +205,47 @@
         setTimeout(() => ripple.remove(), 600);
     };
 
-    // 渲染首页文章分页
+    // 核心内容解析引擎（支持图片、加粗、颜色）
+    const parseContent = (text) => {
+        const urlRegex = /(https?:\/\/[^\s]+|data:image\/[a-zA-Z]+;base64,[^\s]+)/gi;
+        let html = text.replace(urlRegex, (match) => {
+            if (/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(match) || match.startsWith('data:image')) {
+                return `<img src="${match}" loading="lazy">`;
+            }
+            return `<a href="${match}" target="_blank" style="color:var(--accent);">访问链接</a>`;
+        });
+        return html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                   .replace(/\{(.*?):(.*?)\}/g, '<span style="color:$1;">$2</span>')
+                   .replace(/\n/g, '<br>');
+    };
+
     const renderPostPage = async () => {
         const list = document.getElementById('post-list');
         const btn = document.getElementById('post-load-more');
         const nextBatch = allPosts.slice(currentPostIndex, currentPostIndex + POSTS_PER_PAGE);
-        
         for(const f of nextBatch) {
             try {
                 const r = await fetch(`posts/${f.name}?v=`+Date.now()), text = await r.text();
                 const dMatch = text.match(/^日期：(.*)$/m), aMatch = text.match(/^作者：(.*)$/m);
-                const card = document.createElement('div'); 
-                card.className = 'glass-card';
-                card.style.opacity = '0';
+                const card = document.createElement('div'); card.className = 'glass-card'; card.style.opacity = '0';
                 card.innerHTML = `<h3 style="font-size:18px;">${f.name.replace('.txt','')}</h3>
                     <div class="post-info">
                         ${dMatch ? `<span class="post-tag">📅 ${dMatch[1]}</span>` : ''}
                         ${aMatch ? `<span class="post-tag">✍️ ${aMatch[1]}</span>` : ''}
                     </div>`;
-                card.addEventListener("click", (e) => {
-                    createRipple(e, card);
-                    setTimeout(() => openWin(f.name.replace('.txt',''), text), 200);
-                });
+                card.addEventListener("click", (e) => { createRipple(e, card); setTimeout(() => openWin(f.name.replace('.txt',''), text), 200); });
                 list.appendChild(card);
                 setTimeout(() => card.style.opacity = '1', 50);
             } catch(e) {}
         }
-
         currentPostIndex += POSTS_PER_PAGE;
-        if (currentPostIndex >= allPosts.length) {
-            btn.innerText = "已显示全部内容";
-            btn.classList.add('disabled');
-        }
+        if (currentPostIndex >= allPosts.length) { btn.innerText = "已显示全部内容"; btn.classList.add('disabled'); }
     };
 
     const initLogUI = (e, el) => {
         createRipple(e, el);
         logPage = 1; hasMoreLogs = true;
-        openWin('更新日志', '<div id="log-content">正在同步记录...</div>', false);
+        openWin('更新日志', '<div id="log-content">正在同步记录...</div>');
         fetchMoreLogs();
     };
 
@@ -282,11 +271,9 @@
         } catch (err) {} finally { isLogLoading = false; }
     };
 
-    const parseContent = (text) => text.replace(/\n/g, '<br>');
     const updateRuntime = () => {
         const start = new Date("2026-01-09 21:25:00").getTime(), now = new Date().getTime(), diff = now - start;
-        const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000);
-        document.getElementById("runtime-clock").innerText = `${d}天 ${h}时 ${Math.floor((diff%3600000)/60000)}分 ${Math.floor((diff%60000)/1000)}秒`;
+        document.getElementById("runtime-clock").innerText = `${Math.floor(diff/86400000)}天 ${Math.floor((diff%86400000)/3600000)}时 ${Math.floor((diff%3600000)/60000)}分 ${Math.floor((diff%60000)/1000)}秒`;
     };
     setInterval(updateRuntime, 1000);
 
@@ -301,10 +288,11 @@
     const scrollToTop = () => document.getElementById('win-body').scrollTo({ top: 0, behavior: 'smooth' });
     const nav = (p, el) => { document.querySelectorAll('.page').forEach(s => s.style.display = 'none'); document.getElementById('p-'+p).style.display = 'block'; document.querySelectorAll('.dock-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); };
 
-    const openWin = (title, content, isNotice = false) => {
+    const openWin = (title, content) => {
         const m = document.getElementById('win-mask'), b = document.getElementById('win-body'), modal = document.getElementById('win-modal');
         document.getElementById('win-title').innerText = title; modal.classList.remove('full');
         document.getElementById('read-progress').style.width = '0%';
+        // 核心改动：如果是更新日志容器则直接插入，否则经过解析器
         b.innerHTML = content.includes('id="log-content"') ? content : parseContent(content.replace(/^(日期：|作者：).*\n?/gm, ''));
         m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 50);
     };
@@ -314,12 +302,12 @@
 
     const init = async () => {
         updateRuntime();
-        fetch('announcement/notice.txt?v='+Date.now()).then(r => r.text()).then(t => { if(t.trim()) openWin('系统公告', t, true); }).catch(()=>{});
+        fetch('announcement/notice.txt?v='+Date.now()).then(r => r.text()).then(t => { if(t.trim()) openWin('系统公告', t); }).catch(()=>{});
         try {
             const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/posts?v=`+Date.now());
             if(res.ok) {
                 const data = await res.json();
-                allPosts = data.filter(f => f.name.endsWith('.txt')).reverse(); // 最新文章排在前面
+                allPosts = data.filter(f => f.name.endsWith('.txt')).reverse();
                 renderPostPage();
             }
         } catch(e) {}
