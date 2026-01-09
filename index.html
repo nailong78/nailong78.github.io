@@ -19,12 +19,29 @@
         .header { margin-bottom: 35px; }
         .site-title { font-size: 28px; font-weight: 800; letter-spacing: -1.2px; }
 
+        /* 文章列表容器 */
+        .posts-container {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 32px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+        .container-label {
+            font-size: 13px;
+            font-weight: 700;
+            opacity: 0.5;
+            margin: 0 0 12px 10px;
+            display: block;
+        }
+
         .glass-card { 
-            background: var(--glass-light); border: 1px solid var(--border); border-radius: 24px; 
-            padding: 22px; margin-bottom: 15px; backdrop-filter: blur(15px);
+            background: var(--glass-light); border: 1px solid var(--border); border-radius: 22px; 
+            padding: 20px; margin-bottom: 12px; backdrop-filter: blur(15px);
             transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
         }
-        .glass-card:active { transform: scale(0.96); }
+        .glass-card:last-child { margin-bottom: 0; }
+        .glass-card:active { transform: scale(0.97); }
 
         .win-mask { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(20px); 
@@ -74,10 +91,15 @@
         <div style="text-align:center; margin-bottom:40px;">
             <img src="https://github.com/nailong78.png" style="width:85px; height:85px; border-radius:50%; border:3px solid #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.06);" onclick="viewImage(0, [this.src])">
         </div>
-        <div id="post-list"></div>
+        
+        <span class="container-label">文章列表</span>
+        <div id="post-list" class="posts-container"></div>
     </div>
     <div id="p-about" class="page" style="display:none;">
-        <div class="glass-card"><h2>关于本站</h2><p>支持样式语法：**粗体** 和 {#hex:颜色}。</p></div>
+        <div class="glass-card">
+            <h2>关于本站</h2>
+            <p>支持语法：**粗体**、*斜体*、_下划线_、{#颜色:文字}。</p>
+        </div>
     </div>
 </div>
 
@@ -119,7 +141,7 @@
         const src = currentImgList[currentImgIndex];
         counterEl.style.display = currentImgList.length > 1 ? 'block' : 'none';
         if(currentImgList.length > 1) counterEl.innerText = `${currentImgIndex + 1} / ${currentImgList.length}`;
-        dlBtn.style.display = src.startsWith('data:image') ? 'block' : 'none';
+        dlBtn.style.display = (src && src.startsWith('data:image')) ? 'block' : 'none';
     };
 
     const downloadCurrentImg = (e) => {
@@ -188,8 +210,6 @@
     const parseContent = (text) => {
         const urlRegex = /(https?:\/\/[^\s]+|data:image\/[a-zA-Z]+;base64,[^\s]+)/gi;
         const images = [];
-        
-        // 1. 提取图片
         let html = text.replace(urlRegex, (match) => {
             if (match.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(match)) {
                 images.push(match);
@@ -198,12 +218,12 @@
             return `<a href="${match}" target="_blank">查看链接</a>`;
         });
 
-        // 2. 解析样式 (粗体与颜色)
         html = html
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // **粗体**
-            .replace(/\{(.*?):(.*?)\}/g, '<span style="color:$1;">$2</span>'); // {颜色:文字}
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>') // *斜体*
+            .replace(/_(.*?)_/g, '<span style="text-decoration:underline;">$1</span>') // _下划线_
+            .replace(/\{(.*?):(.*?)\}/g, '<span style="color:$1;">$2</span>');
 
-        // 3. 换行与图片回填
         let finalHtml = html.replace(/\n/g, '<br>');
         images.forEach((src, i) => {
             const listStr = JSON.stringify(images).replace(/"/g, '&quot;');
@@ -230,11 +250,12 @@
         const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/posts?v=`+Date.now());
         if(res.ok) {
             const data = await res.json();
+            const list = document.getElementById('post-list');
             data.filter(f => f.name.endsWith('.txt')).forEach(f => {
                 const card = document.createElement('div'); card.className = 'glass-card';
-                card.innerHTML = `<h3>${f.name.replace('.txt','')}</h3>`;
+                card.innerHTML = `<h3 style="font-size:18px;">${f.name.replace('.txt','')}</h3>`;
                 card.onclick = async () => { const r = await fetch(`posts/${f.name}?v=`+Date.now()); openWin(f.name.replace('.txt',''), await r.text()); };
-                document.getElementById('post-list').appendChild(card);
+                list.appendChild(card);
             });
         }
         fetch('https://v1.hitokoto.cn?c=e').then(r=>r.json()).then(d=>document.getElementById('hitokoto').innerText = d.hitokoto);
