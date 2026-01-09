@@ -43,15 +43,29 @@
         .win-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(20px); display: none; z-index: 9000; opacity: 0; transition: 0.4s; align-items: center; justify-content: center; }
         .win-mask.show { display: flex; opacity: 1; }
         
-        .win-modal { width: 90%; max-width: 450px; height: 75vh; background: var(--glass-heavy); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 1px solid rgba(255,255,255,0.5); border-radius: 38px; display: flex; flex-direction: column; padding: 25px; transform: scale(0.9) translateY(30px); transition: 0.5s cubic-bezier(0.1, 1, 0.2, 1); }
+        .win-modal { width: 90%; max-width: 450px; height: 75vh; background: var(--glass-heavy); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 1px solid rgba(255,255,255,0.5); border-radius: 38px; display: flex; flex-direction: column; padding: 25px; transform: scale(0.9) translateY(30px); transition: 0.5s cubic-bezier(0.1, 1, 0.2, 1); overflow: hidden; position: relative; }
         .win-modal.full { width: 100% !important; height: 100% !important; max-width: none !important; border-radius: 0 !important; transform: none !important; padding: 0 !important; }
         
-        /* 全屏标题栏压缩优化 */
+        .win-header { position: relative; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; z-index: 10; }
         .win-modal.full .win-header { padding: 12px 20px; margin-bottom: 0; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.2); }
+        
+        .read-progress-bar { position: absolute; bottom: -1px; left: 0; height: 3px; background: var(--accent); width: 0%; transition: width 0.1s; display: none; }
+        .win-modal.full .read-progress-bar { display: block; }
+
+        .win-body { overflow-y: auto; flex: 1; line-height: 1.8; font-size: 17px; color: #1d1d1f; -webkit-overflow-scrolling: touch; }
         .win-modal.full .win-body { padding: 20px; }
-        .win-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .win-body { overflow-y: auto; flex: 1; line-height: 1.8; font-size: 17px; color: #1d1d1f; }
         .win-body img { display: block; width: 100%; height: auto; border-radius: 18px; margin: 15px 0; cursor: zoom-in; }
+
+        /* iOS 液态回到顶部按钮 */
+        #back-to-top {
+            position: absolute; bottom: 30px; right: 20px; width: 50px; height: 50px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid);
+            border: 0.5px solid rgba(255, 255, 255, 0.4); display: none; align-items: center; justify-content: center;
+            font-size: 20px; color: var(--accent); z-index: 100; box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            opacity: 0; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
+        }
+        #back-to-top.show { opacity: 1; transform: scale(1); }
+        #back-to-top:active { transform: scale(0.85); }
 
         .ios-close-btn { position: absolute; top: 40px; right: 25px; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.45); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 0.5px solid rgba(255, 255, 255, 0.3); z-index: 10002; cursor: pointer; color: #000; }
 
@@ -108,8 +122,10 @@
                 <div class="glass-btn" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:12px; cursor:pointer;" onclick="toggleFull()">🔳</div>
                 <div class="glass-btn" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:12px; cursor:pointer; color:#FF3B30;" onclick="closeWin()">✕</div>
             </div>
+            <div class="read-progress-bar" id="read-progress"></div>
         </div>
-        <div id="win-body" class="win-body"></div>
+        <div id="win-body" class="win-body" onscroll="onWinScroll()"></div>
+        <div id="back-to-top" onclick="scrollToTop()">↑</div>
         <div id="win-footer" style="display:none; text-align:center; padding:20px;"><button style="background:var(--accent); color:#fff; border:none; padding:12px 40px; border-radius:15px; font-weight:700;" onclick="closeWin()">确认</button></div>
     </div>
 </div>
@@ -132,6 +148,31 @@
     };
     setInterval(updateRuntime, 1000);
 
+    const onWinScroll = () => {
+        const body = document.getElementById('win-body');
+        const progress = document.getElementById('read-progress');
+        const btt = document.getElementById('back-to-top');
+        const isFull = document.getElementById('win-modal').classList.contains('full');
+        
+        // 进度条逻辑
+        if (body.scrollHeight > body.clientHeight) {
+            progress.style.width = (body.scrollTop / (body.scrollHeight - body.clientHeight)) * 100 + '%';
+        }
+
+        // 回到顶部逻辑 (仅全屏模式且滚动超过200px显示)
+        if(isFull && body.scrollTop > 200) {
+            btt.style.display = 'flex';
+            setTimeout(() => btt.classList.add('show'), 10);
+        } else {
+            btt.classList.remove('show');
+            setTimeout(() => { if(!btt.classList.contains('show')) btt.style.display = 'none'; }, 300);
+        }
+    };
+
+    const scrollToTop = () => {
+        document.getElementById('win-body').scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     const nav = (p, el) => { document.querySelectorAll('.page').forEach(s => s.style.display = 'none'); document.getElementById('p-'+p).style.display = 'block'; document.querySelectorAll('.dock-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); };
 
     const parseContent = (text) => {
@@ -147,6 +188,8 @@
     const openWin = (title, content, isNotice = false) => {
         const m = document.getElementById('win-mask'), b = document.getElementById('win-body'), modal = document.getElementById('win-modal');
         document.getElementById('win-title').innerText = title; modal.classList.remove('full');
+        document.getElementById('read-progress').style.width = '0%';
+        document.getElementById('back-to-top').style.display = 'none';
         b.innerHTML = parseContent(content.replace(/^(日期：|作者：).*\n?/gm, ''));
         document.getElementById('win-ctrls').style.display = isNotice ? 'none' : 'flex';
         document.getElementById('win-footer').style.display = isNotice ? 'block' : 'none';
@@ -154,7 +197,7 @@
     };
 
     const closeWin = () => { document.getElementById('win-mask').classList.remove('show'); setTimeout(() => document.getElementById('win-mask').style.display = 'none', 400); };
-    const toggleFull = () => document.getElementById('win-modal').classList.toggle('full');
+    const toggleFull = () => { document.getElementById('win-modal').classList.toggle('full'); onWinScroll(); };
     const viewImage = (index, list) => { document.getElementById('full-img').src = list[index]; document.getElementById('img-viewer').style.display = 'flex'; setTimeout(() => document.getElementById('img-viewer').classList.add('show'), 50); };
     const closeImageViewer = () => { document.getElementById('img-viewer').classList.remove('show'); setTimeout(() => document.getElementById('img-viewer').style.display = 'none', 400); };
 
