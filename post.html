@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>阅读 - Nailong78</title>
     <style>
         :root {
@@ -14,39 +14,35 @@
             --glass-bg: rgba(255, 255, 255, 0.6); --glass-border: rgba(255, 255, 255, 0.8);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg-color); color: var(--text-main); transition: 0.5s; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg-color); color: var(--text-main); transition: 0.5s; line-height: 1.8;}
         .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 100px 25px 50px; }
-        .back-nav { position: fixed; top: 30px; left: 20px; z-index: 100; padding: 10px 20px; border-radius: 100px; background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); color: var(--text-main); text-decoration: none; font-size: 14px; font-weight: 600; }
-        h1 { font-size: 32px; font-weight: 800; margin-bottom: 20px; line-height: 1.2; }
-        .content { font-size: 17px; line-height: 1.8; opacity: 0.9; white-space: pre-wrap; }
-        .loading { text-align: center; margin-top: 50px; opacity: 0.5; }
+        .back-nav { position: fixed; top: 30px; left: 20px; z-index: 100; padding: 10px 22px; border-radius: 100px; background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); color: var(--text-main); text-decoration: none; font-size: 14px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { font-size: 32px; font-weight: 800; margin-bottom: 15px; letter-spacing: -1px; }
+        .content { font-size: 17px; opacity: 0.9; white-space: pre-wrap; }
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-nav">← 返回</a>
+    <a href="index.html" class="back-nav">← 返回主页</a>
     <div class="container">
         <h1 id="postTitle">加载中...</h1>
-        <div id="postContent" class="content">
-            <div class="loading">正在连接数字花园...</div>
-        </div>
+        <div id="postContent" class="content">正在打理数字花园...</div>
     </div>
-
     <script>
+        // 主题同步
+        function applyTheme() {
+            let mode = localStorage.getItem('blog-mode') || 'auto';
+            const isNight = new Date().getHours() >= 18 || new Date().getHours() < 6;
+            document.body.classList.toggle('light-mode', mode === 'light' || (mode === 'auto' && !isNight));
+        }
+        applyTheme();
+
         const params = new URLSearchParams(window.location.search);
         const fileName = params.get('file');
-        
         if (fileName) {
             document.getElementById('postTitle').innerText = fileName.replace('.txt', '');
-            // 自动从 posts 文件夹获取
-            fetch(`posts/${fileName}`)
-                .then(res => res.ok ? res.text() : "文章去星际旅行了...")
-                .then(text => {
-                    document.getElementById('postContent').innerText = text;
-                });
-        }
-
-        if (localStorage.getItem('blog-mode') === 'light' || (localStorage.getItem('blog-mode') === 'auto' && new Date().getHours() >= 6 && new Date().getHours() < 18)) {
-            document.body.classList.add('light-mode');
+            fetch(`posts/${fileName}`).then(res => res.text()).then(text => {
+                document.getElementById('postContent').innerText = text;
+            });
         }
     </script>
 </body>
