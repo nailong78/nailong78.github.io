@@ -19,7 +19,7 @@
         .header { margin-bottom: 35px; }
         .site-title { font-size: 28px; font-weight: 800; letter-spacing: -1.2px; }
 
-        /* 内容卡片 */
+        /* 卡片层 */
         .glass-card { 
             background: var(--glass-light); border: 1px solid var(--border); border-radius: 24px; 
             padding: 22px; margin-bottom: 15px; backdrop-filter: blur(15px);
@@ -27,7 +27,7 @@
         }
         .glass-card:active { transform: scale(0.96); }
 
-        /* iOS 26 液态弹窗系统 */
+        /* iOS 26 液态弹窗 */
         .win-mask { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(20px); 
             display: none; z-index: 9000; opacity: 0; transition: 0.4s; align-items: center; justify-content: center;
@@ -43,11 +43,9 @@
         .win-mask.show { display: flex; opacity: 1; }
         .win-mask.show .win-modal { transform: scale(1) translateY(0); }
 
-        /* 弹窗头部与按钮 */
+        /* 顶部按钮 */
         .win-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .win-btns { display: flex; gap: 8px; }
-        
-        /* iOS 26 玻璃按钮 */
         .glass-btn { 
             padding: 6px 12px; border-radius: 14px; background: rgba(0,0,0,0.05); 
             border: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; gap: 5px;
@@ -56,11 +54,10 @@
         .glass-btn:active { background: rgba(0,0,0,0.1); transform: scale(0.95); }
 
         .win-body { overflow-y: auto; flex: 1; line-height: 1.8; font-size: 17px; color: #1d1d1f; text-align: left; }
+        .win-body img { max-width: 100%; border-radius: 18px; margin: 12px 0; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
 
-        /* 1:1 iOS 26 液态玻璃 Dock */
-        .dock-wrapper { 
-            position: fixed; bottom: 30px; left: 0; right: 0; display: flex; justify-content: center; z-index: 8000;
-        }
+        /* 1:1 iOS 26 液态 Dock */
+        .dock-wrapper { position: fixed; bottom: 30px; left: 0; right: 0; display: flex; justify-content: center; z-index: 8000; }
         .dock { 
             position: relative; display: flex; padding: 10px 20px; gap: 12px;
             background: rgba(255, 255, 255, 0.4); 
@@ -69,19 +66,12 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             overflow: hidden;
         }
-        /* 液态覆盖层 */
-        .dock::before {
-            content: ""; position: absolute; inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%);
-            pointer-events: none;
-        }
+        .dock::before { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%); pointer-events: none; }
         .dock-item { display: flex; flex-direction: column; align-items: center; width: 70px; opacity: 0.4; transition: 0.3s; cursor: pointer; position: relative; z-index: 1; }
         .dock-item.active { opacity: 1; transform: translateY(-2px); }
-        .dock-icon { font-size: 22px; }
         .dock-text { font-size: 10px; font-weight: 700; margin-top: 3px; }
 
-        .confirm-btn { background: var(--accent); color: #fff; border: none; padding: 14px 40px; border-radius: 18px; font-weight: 700; cursor: pointer; transition: 0.3s; }
-        .confirm-btn:active { transform: scale(0.9); }
+        .confirm-btn { background: var(--accent); color: #fff; border: none; padding: 14px 40px; border-radius: 18px; font-weight: 700; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -89,7 +79,7 @@
 <div class="container">
     <div class="header">
         <h1 class="site-title">奶龙的个人博客</h1>
-        <p id="hitokoto" style="font-size:11px; opacity:0.6; margin-top:6px; font-weight:500;"></p>
+        <p id="hitokoto" style="font-size:11px; opacity:0.6; margin-top:6px; font-weight:500;">载入每日一言...</p>
     </div>
 
     <div id="p-home" class="page">
@@ -102,7 +92,7 @@
     <div id="p-about" class="page" style="display:none;">
         <div class="glass-card">
             <h2 style="margin-bottom:12px;">关于本站</h2>
-            <p style="font-size:16px; line-height:1.7; opacity:0.8;">基于 iOS 26 标准构建的极简阅读空间。删除冗余，回归本质。</p>
+            <p style="font-size:16px; line-height:1.7; opacity:0.8;">基于 iOS 26 标准构建的极简空间。默认亮色模式，极致玻璃化渲染。</p>
         </div>
     </div>
 </div>
@@ -110,7 +100,7 @@
 <div class="win-mask" id="win-mask">
     <div class="win-modal" id="win-modal">
         <div class="win-header" id="win-header">
-            <h3 id="win-title" style="font-size:20px;"></h3>
+            <h3 id="win-title" style="font-size:20px; font-weight:700;"></h3>
             <div class="win-btns" id="win-ctrls">
                 <div class="glass-btn" onclick="toggleFull()"><span>🔳</span><span>全屏</span></div>
                 <div class="glass-btn" onclick="closeWin()" style="color:#FF3B30;"><span>✕</span><span>关闭</span></div>
@@ -122,8 +112,8 @@
 
 <div class="dock-wrapper">
     <div class="dock">
-        <div class="dock-item active" onclick="nav('home', this)"><span class="dock-icon">🏠</span><span class="dock-text">首页</span></div>
-        <div class="dock-item" onclick="nav('about', this)"><span class="dock-icon">ℹ️</span><span class="dock-text">关于</span></div>
+        <div class="dock-item active" onclick="nav('home', this)"><span style="font-size:22px;">🏠</span><span class="dock-text">首页</span></div>
+        <div class="dock-item" onclick="nav('about', this)"><span style="font-size:22px;">ℹ️</span><span class="dock-text">关于</span></div>
     </div>
 </div>
 
@@ -137,17 +127,28 @@
         el.classList.add('active');
     };
 
+    // 内容解析逻辑
+    const parseContent = (text) => {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.replace(urlRegex, (url) => {
+            if (/\.(jpg|jpeg|png|gif|webp)$/i.test(url.split('?')[0])) {
+                return `<img src="${url}" alt="Image">`;
+            }
+            return `<a href="${url}" target="_blank" style="color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent);">查看链接 🔗</a>`;
+        }).replace(/\n/g, '<br>');
+    };
+
     const openWin = (title, content, isNotice = false) => {
         const m = document.getElementById('win-mask'), v = document.getElementById('win-modal');
         const b = document.getElementById('win-body'), c = document.getElementById('win-ctrls');
         document.getElementById('win-title').innerText = title;
         
         if(isNotice) {
-            c.style.display = 'none'; // 公告隐藏控制按钮
-            b.innerHTML = `<center style="padding:20px 0;"><span style="font-size:45px;">🔔</span><p style="margin-top:15px; font-weight:500;">${content}</p><button class="confirm-btn" onclick="closeWin()" style="margin-top:30px;">确认接收</button></center>`;
+            c.style.display = 'none';
+            b.innerHTML = `<center style="padding:20px 0;"><span style="font-size:45px;">🔔</span><div style="margin-top:15px; font-weight:500;">${parseContent(content)}</div><button class="confirm-btn" onclick="closeWin()" style="margin-top:30px;">确认接收</button></center>`;
         } else {
-            c.style.display = 'flex'; // 文章显示控制按钮
-            b.innerText = content;
+            c.style.display = 'flex';
+            b.innerHTML = parseContent(content);
         }
 
         m.style.display = 'flex';
@@ -164,12 +165,12 @@
     const toggleFull = () => document.getElementById('win-modal').classList.toggle('full');
 
     const init = async () => {
-        // 公告
+        // 加载公告
         fetch('announcement/notice.txt').then(r => r.text()).then(t => {
             if(t.trim().length > 1) openWin('系统公告', t, true);
         }).catch(() => {});
 
-        // 文章
+        // 加载文章
         const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/posts`);
         if(res.ok) {
             const data = await res.json();
@@ -186,7 +187,6 @@
             });
         }
         
-        // 每日一言
         fetch('https://v1.hitokoto.cn?c=e').then(r=>r.json()).then(d=> {
             document.getElementById('hitokoto').innerText = `[每日一言] ${d.hitokoto}`;
         });
