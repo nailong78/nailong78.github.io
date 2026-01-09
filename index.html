@@ -28,23 +28,35 @@
 
         .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 20px; }
         
-        /* 顶部栏 */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; height: 44px;}
+        /* 顶部栏 & 主题菜单 */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; height: 44px; position: relative; }
         .site-title { font-size: 18px; font-weight: 800; }
         #hitokoto { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
-        .theme-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; }
+        
+        .theme-control { position: relative; }
+        .theme-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: transform 0.2s; }
+        .theme-btn:active { transform: scale(0.9); }
 
-        /* --- 果冻头像模块 --- */
+        .theme-menu {
+            position: absolute; top: 55px; right: 0; width: 140px;
+            background: var(--glass-bg); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            padding: 6px; display: none; flex-direction: column; z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: ios-pop 0.4s cubic-bezier(0.15, 1, 0.3, 1);
+            transform-origin: top right;
+        }
+        @keyframes ios-pop { from { opacity: 0; transform: scale(0.8) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        
+        .menu-item { padding: 12px 14px; border-radius: 14px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .menu-item:active { background: rgba(255,255,255,0.1); }
+        .menu-item.active .check-mark { display: block; color: var(--accent); }
+        .check-mark { display: none; font-size: 12px; }
+
+        /* 头像模块 */
         .profile-card { text-align: center; margin-bottom: 25px; }
         .avatar-wrapper { display: inline-block; position: relative; cursor: pointer; }
-        .avatar { 
-            width: 85px; height: 85px; border-radius: 50%; 
-            border: 3px solid var(--glass-border); 
-            margin-bottom: 12px; 
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: block;
-        }
-        /* 点击时的果冻动画类 */
+        .avatar { width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--glass-border); margin-bottom: 12px; transition: transform 0.4s; display: block; }
         .jello { animation: jello-anim 0.6s both; }
         @keyframes jello-anim {
             0% { transform: scale3d(1, 1, 1); }
@@ -79,7 +91,14 @@
     <div class="container">
         <div class="top-bar">
             <div><div class="site-title">奶龙的个人博客</div><div id="hitokoto">读取中...</div></div>
-            <div class="theme-btn" id="themeBtn">🌓</div>
+            <div class="theme-control">
+                <div class="theme-btn" id="themeBtn">🌓</div>
+                <div class="theme-menu" id="themeMenu">
+                    <div class="menu-item" data-mode="auto">自动 <span class="check-mark">✓</span></div>
+                    <div class="menu-item" data-mode="light">浅色 <span class="check-mark">✓</span></div>
+                    <div class="menu-item" data-mode="dark">深色 <span class="check-mark">✓</span></div>
+                </div>
+            </div>
         </div>
 
         <div id="main-content" class="page">
@@ -103,7 +122,7 @@
         <div id="about-content" class="page hidden">
             <div class="glass-card" style="margin-top: 20px;">
                 <h3>关于本站</h3>
-                <p style="margin-top:10px; opacity:0.7; line-height: 1.6; font-size: 14px;">iOS 26 实验室。全自动化文件驱动系统，通过 GitHub API 实时识别 posts 和 apps 文件夹内容。</p>
+                <p style="margin-top:10px; opacity:0.7; line-height: 1.6; font-size: 14px;">iOS 26 实验室。全自动化文件驱动系统，实时通过 GitHub API 同步。</p>
             </div>
         </div>
     </div>
@@ -118,57 +137,53 @@
     <script>
         const user = "nailong78", repo = "nailong78.github.io";
 
-        // --- 果冻头像点击逻辑 ---
-        const avatarTrigger = document.getElementById('avatarTrigger');
-        const avatarImg = document.getElementById('avatarImg');
-
-        avatarTrigger.addEventListener('click', () => {
-            // 触发震动 (iOS 暂不支持 navigator.vibrate, 安卓 Chrome 支持)
-            if (navigator.vibrate) {
-                navigator.vibrate(10); // 10毫秒短促震动
-            }
-
-            // 添加动画类，先移除确保能重复触发
-            avatarImg.classList.remove('jello');
-            void avatarImg.offsetWidth; // 触发重绘
-            avatarImg.classList.add('jello');
-
-            // 动画结束后自动移除类名
-            setTimeout(() => {
-                avatarImg.classList.remove('jello');
-            }, 600);
-        });
-
-        // 主题同步逻辑
+        // --- 主题管理 (带菜单) ---
+        const themeBtn = document.getElementById('themeBtn'), themeMenu = document.getElementById('themeMenu');
+        const menuItems = document.querySelectorAll('.menu-item');
+        
         function applyTheme() {
             let mode = localStorage.getItem('blog-mode') || 'auto';
             const isNight = new Date().getHours() >= 18 || new Date().getHours() < 6;
             const isLight = mode === 'light' || (mode === 'auto' && !isNight);
             document.body.classList.toggle('light-mode', isLight);
-            document.getElementById('themeBtn').innerText = isLight ? '☀️' : '🌙';
+            themeBtn.innerText = isLight ? '☀️' : '🌙';
+            menuItems.forEach(i => i.classList.toggle('active', i.dataset.mode === mode));
         }
 
-        document.getElementById('themeBtn').onclick = () => {
-            let current = localStorage.getItem('blog-mode') || 'auto';
-            let next = (current === 'light') ? 'dark' : 'light';
-            localStorage.setItem('blog-mode', next);
-            applyTheme();
+        themeBtn.onclick = (e) => {
+            e.stopPropagation();
+            const isVisible = themeMenu.style.display === 'flex';
+            themeMenu.style.display = isVisible ? 'none' : 'flex';
         };
 
-        // 自动化列表加载
+        menuItems.forEach(item => {
+            item.onclick = function() {
+                const mode = this.dataset.mode;
+                localStorage.setItem('blog-mode', mode);
+                applyTheme();
+                themeMenu.style.display = 'none';
+            };
+        });
+
+        document.onclick = () => themeMenu.style.display = 'none';
+
+        // --- 头像果冻特效 ---
+        const avatarImg = document.getElementById('avatarImg');
+        document.getElementById('avatarTrigger').addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(10);
+            avatarImg.classList.remove('jello');
+            void avatarImg.offsetWidth;
+            avatarImg.classList.add('jello');
+        });
+
+        // --- 自动化数据 ---
         async function loadData() {
             const pRes = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/posts`);
             if (pRes.ok) {
                 const data = await pRes.json();
                 const list = document.getElementById('post-list');
                 data.filter(f => f.name.endsWith('.txt')).forEach(file => {
-                    list.innerHTML += `
-                        <a href="post.html?file=${encodeURIComponent(file.name)}" style="text-decoration:none; color:inherit;">
-                            <div class="glass-card">
-                                <h3 style="font-size:17px;">${file.name.replace('.txt','')}</h3>
-                                <p style="font-size:12px; opacity:0.5; margin-top:6px;">点击进入沉浸式阅读模式</p>
-                            </div>
-                        </a>`;
+                    list.innerHTML += `<a href="post.html?file=${encodeURIComponent(file.name)}" style="text-decoration:none; color:inherit;"><div class="glass-card"><h3 style="font-size:17px;">${file.name.replace('.txt','')}</h3><p style="font-size:12px; opacity:0.5; margin-top:6px;">点击阅读</p></div></a>`;
                 });
             }
             const aRes = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/apps`);
@@ -178,16 +193,12 @@
                 data.forEach(file => {
                     const isPy = file.name.endsWith('.py');
                     const url = isPy ? `python_runner.html?file=${encodeURIComponent(file.name)}` : `apps/${file.name}`;
-                    list.innerHTML += `
-                        <a href="${url}" class="app-item">
-                            <div class="app-icon">${isPy ? '🐍' : '🌐'}</div>
-                            <span>${file.name.split('.')[0]}</span>
-                        </a>`;
+                    list.innerHTML += `<a href="${url}" class="app-item"><div class="app-icon">${isPy ? '🐍' : '🌐'}</div><span>${file.name.split('.')[0]}</span></a>`;
                 });
             }
         }
 
-        // 导航滑块
+        // --- 导航逻辑 ---
         const slider = document.getElementById('dockSlider');
         function switchPage(id, nav) {
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
