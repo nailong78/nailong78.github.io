@@ -89,11 +89,28 @@
         #back-to-top { position: absolute; bottom: 30px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 0.5px solid rgba(255, 255, 255, 0.4); display: none; align-items: center; justify-content: center; font-size: 20px; color: var(--accent); z-index: 100; opacity: 0; transition: 0.3s; cursor: pointer; }
         #back-to-top.show { opacity: 1; transform: scale(1); }
 
-        .dock-wrapper { position: fixed; bottom: 30px; left: 0; right: 0; display: flex; justify-content: center; z-index: 8000; }
-        .dock { display: flex; padding: 10px 20px; gap: 12px; background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border-radius: 40px; border: 1px solid rgba(255,255,255,0.6); }
-        .dock-item { display: flex; flex-direction: column; align-items: center; width: 70px; opacity: 0.4; transition: 0.3s; cursor: pointer; }
-        .dock-item.active { opacity: 1; transform: translateY(-2px); }
-        .dock-text { font-size: 10px; font-weight: 700; margin-top: 3px; }
+        /* 增强悬浮感的 Dock */
+        .dock-wrapper { 
+            position: fixed; bottom: 0; left: 0; right: 0; 
+            padding: 20px 0 40px; 
+            display: flex; justify-content: center; z-index: 8000;
+            background: linear-gradient(to top, var(--bg) 20%, transparent 100%);
+            pointer-events: none;
+        }
+        .dock { 
+            display: flex; padding: 10px 20px; gap: 12px; 
+            background: rgba(255, 255, 255, 0.45); 
+            backdrop-filter: blur(40px) saturate(210%); 
+            -webkit-backdrop-filter: blur(40px) saturate(210%); 
+            border-radius: 40px; 
+            border: 1px solid rgba(255,255,255,0.7);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12), 0 0 1px rgba(0,0,0,0.05);
+            pointer-events: auto;
+            transform: translateZ(0); /* 开启 GPU 加速 */
+        }
+        .dock-item { display: flex; flex-direction: column; align-items: center; width: 70px; opacity: 0.4; transition: 0.3s cubic-bezier(0.23, 1, 0.32, 1); cursor: pointer; }
+        .dock-item.active { opacity: 1; transform: translateY(-4px); }
+        .dock-text { font-size: 10px; font-weight: 700; margin-top: 3px; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
@@ -170,7 +187,6 @@
 <script>
     const user = "nailong78", repo = "nailong78.github.io";
 
-    // 视差滚动逻辑
     const parallaxBg = document.getElementById('parallax-bg');
     window.addEventListener('scroll', () => {
         const scrolled = window.pageYOffset;
