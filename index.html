@@ -16,17 +16,33 @@
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: #000; overflow-x: hidden; }
 
-        /* 首页背景图系统 */
+        /* 背景与呼吸灯光晕 */
         .hero-banner {
             position: absolute; top: 0; left: 0; width: 100%; height: 400px;
             background: url('首页背景图.jpeg') no-repeat center center;
             background-size: cover; z-index: -1;
             -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
             mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+            display: flex; align-items: center; justify-content: center;
         }
+        .welcome-glow {
+            position: absolute; width: 250px; height: 250px;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(0,122,255,0.3) 50%, transparent 70%);
+            filter: blur(40px); mix-blend-mode: overlay; pointer-events: none;
+            animation: welcome-breath 4s infinite ease-in-out;
+        }
+        .welcome-text {
+            position: relative; color: white; font-size: 26px; font-weight: 800;
+            letter-spacing: 4px; text-shadow: 0 0 20px rgba(0,0,0,0.3);
+            animation: text-breath 4s infinite ease-in-out;
+        }
+        @keyframes welcome-breath { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 0.8; } }
+        @keyframes text-breath { 0%, 100% { opacity: 0.7; transform: scale(0.98); } 50% { opacity: 1; transform: scale(1.05); } }
         
         .container { padding: 40px 20px 140px; max-width: 600px; margin: 0 auto; position: relative; }
-        .header { margin-bottom: 35px; text-shadow: 0 2px 10px rgba(255,255,255,0.5); }
+        .header { margin-bottom: 35px; }
+        .site-title-box { display: flex; align-items: center; gap: 10px; }
+        .title-avatar { width: 28px; height: 28px; border-radius: 8px; border: 1.5px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .site-title { font-size: 28px; font-weight: 800; letter-spacing: -1.2px; }
 
         .posts-container { background: rgba(255, 255, 255, 0.4); border-radius: 32px; padding: 15px; border: 1px solid var(--border); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
@@ -42,24 +58,24 @@
         .runtime-card { background: rgba(255, 255, 255, 0.5); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 24px; padding: 18px; text-align: center; margin-top: 10px; }
         #runtime-clock { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent); font-size: 15px; }
 
-        .post-meta { font-size: 12px; opacity: 0.5; margin-top: 8px; font-weight: 500; display: flex; gap: 12px; }
-
-        /* 弹窗系统 */
         .win-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: none; z-index: 9000; opacity: 0; transition: 0.4s; align-items: center; justify-content: center; }
         .win-mask.show { display: flex; opacity: 1; }
         .win-modal { width: 90%; max-width: 450px; height: 75vh; background: var(--glass-heavy); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 1px solid rgba(255,255,255,0.5); border-radius: 38px; display: flex; flex-direction: column; padding: 25px; transform: scale(0.9) translateY(30px); transition: 0.5s cubic-bezier(0.1, 1, 0.2, 1); overflow: hidden; position: relative; }
         .win-modal.full { width: 100% !important; height: 100% !important; max-width: none !important; border-radius: 0 !important; transform: none !important; padding: 0 !important; }
+        
         .win-header { position: relative; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; z-index: 10; }
         .win-modal.full .win-header { padding: 12px 20px; margin-bottom: 0; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.2); }
         .read-progress-bar { position: absolute; bottom: -1px; left: 0; height: 3px; background: var(--accent); width: 0%; transition: width 0.1s; display: none; }
         .win-modal.full .read-progress-bar { display: block; }
+
         .win-body { overflow-y: auto; flex: 1; line-height: 1.8; font-size: 17px; color: #1d1d1f; -webkit-overflow-scrolling: touch; }
         .win-modal.full .win-body { padding: 20px; }
+        .win-body img { display: block; width: 100%; height: auto; border-radius: 18px; margin: 15px 0; }
+
         #back-to-top { position: absolute; bottom: 30px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 0.5px solid rgba(255, 255, 255, 0.4); display: none; align-items: center; justify-content: center; font-size: 20px; color: var(--accent); z-index: 100; opacity: 0; transition: 0.3s; cursor: pointer; }
         #back-to-top.show { opacity: 1; transform: scale(1); }
 
-        /* Dock 栏 */
-        .dock-wrapper { position: fixed; bottom: 30px; left: 0; right: 0; display: flex; justify: center; z-index: 8000; justify-content: center; }
+        .dock-wrapper { position: fixed; bottom: 30px; left: 0; right: 0; display: flex; justify-content: center; z-index: 8000; }
         .dock { display: flex; padding: 10px 20px; gap: 12px; background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border-radius: 40px; border: 1px solid rgba(255,255,255,0.6); }
         .dock-item { display: flex; flex-direction: column; align-items: center; width: 70px; opacity: 0.4; transition: 0.3s; cursor: pointer; }
         .dock-item.active { opacity: 1; transform: translateY(-2px); }
@@ -68,31 +84,35 @@
 </head>
 <body>
 
-<div class="hero-banner"></div>
+<div class="hero-banner">
+    <div class="welcome-glow" id="glow"></div>
+    <div class="welcome-text">欢迎光临</div>
+</div>
 
 <div class="container">
     <div class="header">
-        <h1 class="site-title">奶龙的个人博客</h1>
+        <div class="site-title-box">
+            <img src="https://github.com/nailong78.png" class="title-avatar">
+            <h1 class="site-title">奶龙的个人博客</h1>
+        </div>
         <p id="hitokoto" style="font-size:11px; opacity:0.6; margin-top:6px; font-weight:600;">载入中...</p>
     </div>
     
     <div id="p-home" class="page">
-        <div style="text-align:center; margin-bottom:40px;">
-            <img src="https://github.com/nailong78.png" style="width:85px; height:85px; border-radius:50%; border:3px solid #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">
-        </div>
         <span class="container-label">文章列表</span>
         <div id="post-list" class="posts-container"></div>
-        <span class="container-label">安全运行</span>
+        <span class="container-label">运行状态</span>
         <div class="runtime-card">
-            <p style="font-size: 11px; font-weight: 700; opacity: 0.5; margin-bottom: 5px; text-transform: uppercase;">System Online</p>
-            <div id="runtime-clock">Initializing...</div>
+            <p style="font-size: 11px; font-weight: 700; opacity: 0.5; margin-bottom: 5px;">本站已安全运行</p>
+            <div id="runtime-clock">正在计算时间...</div>
         </div>
     </div>
 
     <div id="p-about" class="page" style="display:none;">
         <div class="posts-container" style="text-align:center; padding:40px 20px;">
-            <h2 style="font-weight:800; letter-spacing:-1px;">关于作者</h2>
-            <p style="margin-top:15px; opacity:0.7; line-height:1.6;">探索科技与艺术的边界。</p>
+            <img src="https://github.com/nailong78.png" style="width:80px; height:80px; border-radius:24px; margin-bottom:15px; border:3px solid #fff;">
+            <h2 style="font-weight:800;">关于作者</h2>
+            <p style="margin-top:15px; opacity:0.7; line-height:1.6; font-size: 14px;">欢迎来到我的数字花园。<br>在这里分享技术、生活与思考。</p>
         </div>
     </div>
 </div>
@@ -102,15 +122,15 @@
         <div class="win-header">
             <h3 id="win-title" style="font-size:18px; font-weight:700;"></h3>
             <div style="display:flex; gap:8px;">
-                <div class="glass-btn" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:12px; cursor:pointer;" onclick="toggleFull()">🔳</div>
-                <div class="glass-btn" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:12px; cursor:pointer; color:#FF3B30;" onclick="closeWin()">✕</div>
+                <div class="glass-btn" onclick="toggleFull()" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:12px; cursor:pointer;">🔳</div>
+                <div class="glass-btn" onclick="closeWin()" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:12px; cursor:pointer; color:#FF3B30;">✕</div>
             </div>
             <div class="read-progress-bar" id="read-progress"></div>
         </div>
         <div id="win-body" class="win-body" onscroll="onWinScroll()"></div>
         <div id="back-to-top" onclick="scrollToTop()">↑</div>
         <div id="win-footer" style="display:none; text-align:center; padding:20px; border-top:1px solid var(--border);">
-            <button style="background:var(--accent); color:#fff; border:none; padding:12px 40px; border-radius:15px; font-weight:700;" onclick="closeWin()">我知道了</button>
+            <button style="background:var(--accent); color:#fff; border:none; padding:12px 40px; border-radius:15px; font-weight:700;" onclick="closeWin()">确定</button>
         </div>
     </div>
 </div>
@@ -125,10 +145,25 @@
 <script>
     const user = "nailong78", repo = "nailong78.github.io";
 
+    // 格式解析引擎
+    const parseContent = (text) => {
+        const urlRegex = /(https?:\/\/[^\s]+|data:image\/[a-zA-Z]+;base64,[^\s]+)/gi;
+        let html = text.replace(urlRegex, (match) => {
+            if (/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(match) || match.startsWith('data:image')) {
+                return `<img src="${match}" loading="lazy">`;
+            }
+            return `<a href="${match}" target="_blank" style="color:var(--accent);">访问链接</a>`;
+        });
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                   .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                   .replace(/\{(.*?):(.*?)\}/g, '<span style="color:$1;">$2</span>');
+        return html.replace(/\n/g, '<br>');
+    };
+
     const updateRuntime = () => {
         const start = new Date("2026-01-09 21:25:00").getTime(), now = new Date().getTime(), diff = now - start;
         const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
-        document.getElementById("runtime-clock").innerText = `${d}D ${h}H ${m}M ${s}S`;
+        document.getElementById("runtime-clock").innerText = `${d}天 ${h}时 ${m}分 ${s}秒`;
     };
     setInterval(updateRuntime, 1000);
 
@@ -146,7 +181,7 @@
         const m = document.getElementById('win-mask'), b = document.getElementById('win-body'), modal = document.getElementById('win-modal');
         document.getElementById('win-title').innerText = title; modal.classList.remove('full');
         document.getElementById('read-progress').style.width = '0%';
-        b.innerHTML = content.replace(/\n/g, '<br>');
+        b.innerHTML = parseContent(content);
         document.getElementById('win-footer').style.display = isNotice ? 'block' : 'none';
         m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 50);
     };
@@ -156,9 +191,7 @@
 
     const init = async () => {
         updateRuntime();
-        // 加载公告
         fetch('announcement/notice.txt?v='+Date.now()).then(r => r.text()).then(t => { if(t.trim()) openWin('系统公告', t, true); }).catch(()=>{});
-        // 加载文章列表
         try {
             const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/posts?v=`+Date.now());
             if(res.ok) {
@@ -167,13 +200,13 @@
                 for(const f of data.filter(f => f.name.endsWith('.txt'))) {
                     const r = await fetch(`posts/${f.name}?v=`+Date.now()), text = await r.text();
                     const card = document.createElement('div'); card.className = 'glass-card';
-                    card.innerHTML = `<h3 style="font-size:18px;">${f.name.replace('.txt','')}</h3><div class="post-meta"><span>📂 点击阅读全文</span></div>`;
+                    card.innerHTML = `<h3 style="font-size:18px;">${f.name.replace('.txt','')}</h3><div class="post-meta"><span>📅 点击阅读文章</span></div>`;
                     card.onclick = () => openWin(f.name.replace('.txt',''), text);
                     list.appendChild(card);
                 }
             }
         } catch(e) {}
-        fetch('https://v1.hitokoto.cn?c=e').then(r=>r.json()).then(d=>document.getElementById('hitokoto').innerText = d.hitokoto);
+        fetch('https://v1.hitokoto.cn?c=e').then(r=>r.json()).then(d=>document.getElementById('hitokoto').innerText = `「每日一言」${d.hitokoto}`);
     };
     window.onload = init;
 </script>
