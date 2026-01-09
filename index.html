@@ -3,140 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nailong78 的博客</title>
+    <title>Nailong78 Blog</title>
     <style>
-        /* === CSS 变量系统：定义两套皮肤 === */
         :root {
-            /* 默认暗色模式 (Dark) */
-            --bg-color: #050505;
-            --text-main: #ffffff;
-            --text-sub: rgba(255, 255, 255, 0.6);
-            
-            /* 玻璃卡片：暗色下是微透明白 */
-            --glass-bg: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-            
-            /* 氛围光：霓虹感 */
-            --blob-color-1: rgba(120, 0, 255, 0.5);
-            --blob-color-2: rgba(0, 100, 255, 0.5);
+            --bg-color: #050505; --text-main: #ffffff; --text-sub: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(255, 255, 255, 0.08); --glass-border: rgba(255, 255, 255, 0.1);
+            --blob-1: rgba(120, 0, 255, 0.4); --blob-2: rgba(0, 100, 255, 0.4);
         }
 
-        /* 亮色模式 (Light) - 通过 body.light-mode 激活 */
         body.light-mode {
-            --bg-color: #f2f4f6; /* 柔和灰白底 */
-            --text-main: #1a1a1a;
-            --text-sub: rgba(0, 0, 0, 0.6);
-            
-            /* 玻璃卡片：亮色下是高透加深色阴影 */
-            --glass-bg: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.8);
-            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            
-            /* 氛围光：糖果色/水彩感 */
-            --blob-color-1: rgba(255, 100, 200, 0.4);
-            --blob-color-2: rgba(0, 200, 255, 0.4);
+            --bg-color: #f2f4f6; --text-main: #1a1a1a; --text-sub: rgba(0, 0, 0, 0.6);
+            --glass-bg: rgba(255, 255, 255, 0.6); --glass-border: rgba(255, 255, 255, 0.8);
+            --blob-1: rgba(255, 100, 200, 0.3); --blob-2: rgba(0, 200, 255, 0.3);
         }
 
-        /* === 基础样式 === */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            overflow-x: hidden;
-            transition: background-color 0.5s ease, color 0.3s ease; /* 丝滑过渡 */
-            padding-bottom: 90px;
+            background-color: var(--bg-color); color: var(--text-main);
+            min-height: 100vh; transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-x: hidden; padding-bottom: 100px;
         }
 
-        /* === 动态液态背景 === */
-        .background-blob {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            overflow: hidden; pointer-events: none;
-        }
-        .blob {
-            position: absolute; border-radius: 50%;
-            filter: blur(80px); opacity: 0.8;
-            animation: float 10s ease-in-out infinite alternate;
-            transition: background 0.5s ease; /* 颜色切换过渡 */
-        }
-        .blob-1 {
-            top: -10%; left: -10%; width: 50vw; height: 50vw;
-            background: var(--blob-color-1);
-        }
-        .blob-2 {
-            bottom: 20%; right: -10%; width: 60vw; height: 60vw;
-            background: var(--blob-color-2);
-            animation-delay: -5s;
-        }
+        /* 液态背景 */
+        .background-blob { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; filter: blur(60px); }
+        .blob { position: absolute; border-radius: 50%; animation: move 15s infinite alternate; }
+        .blob-1 { top: -10%; left: -10%; width: 300px; height: 300px; background: var(--blob-1); }
+        .blob-2 { bottom: 10%; right: -10%; width: 350px; height: 350px; background: var(--blob-2); }
+        @keyframes move { from { transform: translate(0,0); } to { transform: translate(40px, 60px); } }
 
-        /* === 布局容器 === */
-        .container { width: 100%; max-width: 480px; padding: 24px; display: flex; flex-direction: column; gap: 20px; position: relative; z-index: 1; }
+        .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 20px; }
 
-        /* === 核心组件：液态玻璃卡片 === */
+        /* 顶部控制栏 */
+        .header { display: flex; justify-content: flex-end; position: relative; padding: 10px 0; }
+        
+        /* 切换按钮 */
+        .theme-btn {
+            width: 45px; height: 45px; border-radius: 50%; background: var(--glass-bg);
+            border: 1px solid var(--glass-border); backdrop-filter: blur(20px);
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
+            cursor: pointer; z-index: 101; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .theme-btn:active { transform: scale(0.9); }
+
+        /* 液态玻璃弹出菜单 */
+        .theme-menu {
+            position: absolute; top: 65px; right: 0; width: 160px;
+            background: var(--glass-bg); backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            padding: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            display: none; flex-direction: column; gap: 4px; z-index: 100;
+            transform-origin: top right; animation: menuShow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes menuShow {
+            from { opacity: 0; transform: scale(0.5) translateY(-20px); filter: blur(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
+        .menu-item {
+            padding: 12px 16px; border-radius: 16px; font-size: 14px; font-weight: 500;
+            color: var(--text-main); cursor: pointer; transition: 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.1); }
+        .menu-item.active { background: rgba(255,255,255,0.2); }
+
+        /* 卡片通用 */
         .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            border-radius: 28px;
-            padding: 24px;
-            box-shadow: var(--glass-shadow);
-            transition: all 0.3s ease;
-        }
-        .glass-card:active { transform: scale(0.98); }
-
-        /* === 顶部栏与切换按钮 === */
-        .header-row { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px; }
-        .theme-toggle {
-            width: 44px; height: 44px;
-            border-radius: 50%;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            font-size: 20px;
+            background: var(--glass-bg); backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border); border-radius: 30px;
+            padding: 24px; margin-bottom: 20px;
         }
 
-        /* === 个人信息 === */
-        .profile { text-align: center; padding: 40px 20px; }
-        .avatar {
-            width: 96px; height: 96px; border-radius: 50%;
-            border: 3px solid rgba(255,255,255,0.5);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            margin-bottom: 16px; object-fit: cover;
-        }
-        h1 { font-size: 22px; margin-bottom: 8px; font-weight: 700; letter-spacing: -0.5px; }
-        .bio { font-size: 15px; color: var(--text-sub); line-height: 1.5; }
+        /* 个人信息 */
+        .profile { text-align: center; }
+        .avatar { width: 90px; height: 90px; border-radius: 50%; margin-bottom: 15px; border: 2px solid var(--glass-border); }
+        
+        /* 关于页面内容 (默认隐藏，通过JS切换) */
+        #main-content, #about-content { transition: 0.4s; }
+        .hidden { display: none; }
 
-        /* === 文章列表 === */
-        .post-item { text-decoration: none; color: inherit; display: block; position: relative; }
-        .post-date { font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px; letter-spacing: 0.5px; }
-        .post-title { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
-        .post-desc { font-size: 14px; color: var(--text-sub); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-        /* === 底部 Dock 栏 === */
+        /* 底部Dock */
         .dock {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            background: var(--glass-bg);
-            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-            border: 1px solid var(--glass-border);
-            padding: 14px 28px; border-radius: 100px;
-            display: flex; gap: 32px; z-index: 100;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            background: var(--glass-bg); backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border); padding: 12px 30px;
+            border-radius: 100px; display: flex; gap: 40px; z-index: 99;
         }
-        .dock a { color: var(--text-main); text-decoration: none; font-size: 14px; font-weight: 600; opacity: 0.6; transition: 0.2s; }
-        .dock a.active { opacity: 1; }
-
-        @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(20px, 40px); } }
+        .dock-item { color: var(--text-main); text-decoration: none; font-size: 14px; opacity: 0.5; transition: 0.3s; cursor: pointer; }
+        .dock-item.active { opacity: 1; font-weight: 700; }
     </style>
 </head>
-<body>
+<body class="dark-mode">
 
     <div class="background-blob">
         <div class="blob blob-1"></div>
@@ -144,60 +101,109 @@
     </div>
 
     <div class="container">
-        <div class="header-row">
-            <button class="theme-toggle" id="themeBtn">🌙</button>
+        <div class="header">
+            <div class="theme-btn" id="themeBtn">🌓</div>
+            <div class="theme-menu" id="themeMenu">
+                <div class="menu-item" data-mode="auto">自动 (日落) <span id="auto-check"></span></div>
+                <div class="menu-item" data-mode="light">亮色模式</div>
+                <div class="menu-item" data-mode="dark">暗色模式</div>
+            </div>
         </div>
 
-        <div class="glass-card profile">
-            <img src="https://github.com/nailong78.png" alt="Avatar" class="avatar">
-            <h1>Nailong78</h1>
-            <p class="bio">Less is More. <br> 探索 iOS 26 液态美学</p>
+        <div id="main-content">
+            <div class="glass-card profile">
+                <img src="https://github.com/nailong78.png" class="avatar">
+                <h1>Nailong78</h1>
+                <p style="color:var(--text-sub); margin-top:8px;">你好，这里是我的数字花园。</p>
+            </div>
+            <div class="glass-card">
+                <h3 style="margin-bottom:10px;">最近动态</h3>
+                <p style="font-size:14px; color:var(--text-sub);">正在使用 GitHub Actions 探索自动化部署的无限可能...</p>
+            </div>
         </div>
 
-        <a href="#" class="glass-card post-item">
-            <div class="post-date">2026.01.09</div>
-            <div class="post-title">如何构建液态玻璃风格？</div>
-            <div class="post-desc">本文介绍 CSS Backdrop-filter 的高级应用与亮暗模式切换的实现原理。</div>
-        </a>
-
-        <a href="#" class="glass-card post-item">
-            <div class="post-date">置顶</div>
-            <div class="post-title">Hello World</div>
-            <div class="post-desc">我的全云端 GitHub 博客正式上线。</div>
-        </a>
+        <div id="about-content" class="hidden">
+            <div class="glass-card">
+                <h2>关于我</h2>
+                <p style="margin-top:15px; line-height:1.6;">
+                    我是 <b>Nailong78</b>。<br><br>
+                    这是一个完全基于 GitHub 生态构建的博客。我追求极致的简洁与流畅的动效，这便是我模仿 iOS 26 设计此站的原因。<br><br>
+                    技能：HTML / CSS / 审美驱动开发 / 云端办公<br>
+                    坐标：互联网的某个角落
+                </p>
+            </div>
+        </div>
     </div>
 
     <div class="dock">
-        <a href="#" class="active">首页</a>
-        <a href="https://github.com/nailong78">GitHub</a>
-        <a href="#">关于</a>
+        <div class="dock-item active" id="nav-home">首页</div>
+        <div class="dock-item" id="nav-about">关于</div>
     </div>
 
     <script>
-        // 获取按钮和 Body
         const themeBtn = document.getElementById('themeBtn');
+        const themeMenu = document.getElementById('themeMenu');
         const body = document.body;
+        let currentMode = localStorage.getItem('theme-mode') || 'auto';
 
-        // 检查是否有保存的主题设置
-        if (localStorage.getItem('theme') === 'light') {
-            body.classList.add('light-mode');
-            themeBtn.textContent = '☀️';
+        // 1. 主题切换逻辑
+        function updateTheme() {
+            const hour = new Date().getHours();
+            const isNight = hour >= 18 || hour < 6; // 假设18点日落，6点日出
+
+            if (currentMode === 'auto') {
+                isNight ? body.classList.remove('light-mode') : body.classList.add('light-mode');
+                document.getElementById('auto-check').innerText = '✓';
+            } else {
+                currentMode === 'light' ? body.classList.add('light-mode') : body.classList.remove('light-mode');
+                document.getElementById('auto-check').innerText = '';
+            }
+            themeBtn.innerText = body.classList.contains('light-mode') ? '☀️' : '🌙';
         }
 
-        // 点击切换事件
-        themeBtn.addEventListener('click', () => {
-            body.classList.toggle('light-mode');
-            
-            // 判断当前模式并保存到本地存储
-            if (body.classList.contains('light-mode')) {
-                themeBtn.textContent = '☀️'; // 变成太阳图标
-                localStorage.setItem('theme', 'light');
-            } else {
-                themeBtn.textContent = '🌙'; // 变成月亮图标
-                localStorage.setItem('theme', 'dark');
-            }
-        });
-    </script>
+        // 按钮点击弹出菜单
+        themeBtn.onclick = (e) => {
+            e.stopPropagation();
+            themeMenu.style.display = themeMenu.style.display === 'flex' ? 'none' : 'flex';
+        };
 
+        // 菜单项点击
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.onclick = function() {
+                currentMode = this.dataset.mode;
+                localStorage.setItem('theme-mode', currentMode);
+                updateTheme();
+                themeMenu.style.display = 'none';
+            };
+        });
+
+        // 点击空白处关闭菜单
+        document.onclick = () => themeMenu.style.display = 'none';
+
+        // 2. 关于页面切换逻辑
+        const mainContent = document.getElementById('main-content');
+        const aboutContent = document.getElementById('about-content');
+        const navHome = document.getElementById('nav-home');
+        const navAbout = document.getElementById('nav-about');
+
+        navAbout.onclick = () => {
+            mainContent.classList.add('hidden');
+            aboutContent.classList.remove('hidden');
+            navAbout.classList.add('active');
+            navHome.classList.remove('active');
+        };
+
+        navHome.onclick = () => {
+            aboutContent.classList.add('hidden');
+            mainContent.classList.remove('hidden');
+            navHome.classList.add('active');
+            navAbout.classList.remove('active');
+        };
+
+        // 初始化
+        updateTheme();
+        // 每分钟检查一次时间（针对自动模式）
+        setInterval(updateTheme, 60000);
+    </script>
 </body>
 </html>
