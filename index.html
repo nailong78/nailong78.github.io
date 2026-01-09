@@ -16,7 +16,6 @@
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: #000; overflow-x: hidden; }
 
-        /* 视差背景容器 */
         .hero-banner {
             position: fixed; top: 0; left: 0; width: 100%; height: 450px;
             background: url('首页背景图.jpeg') no-repeat center center;
@@ -89,28 +88,22 @@
         #back-to-top { position: absolute; bottom: 30px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 0.5px solid rgba(255, 255, 255, 0.4); display: none; align-items: center; justify-content: center; font-size: 20px; color: var(--accent); z-index: 100; opacity: 0; transition: 0.3s; cursor: pointer; }
         #back-to-top.show { opacity: 1; transform: scale(1); }
 
-        /* 增强悬浮感的 Dock */
         .dock-wrapper { 
-            position: fixed; bottom: 0; left: 0; right: 0; 
-            padding: 20px 0 40px; 
+            position: fixed; bottom: 0; left: 0; right: 0; padding: 20px 0 40px; 
             display: flex; justify-content: center; z-index: 8000;
             background: linear-gradient(to top, var(--bg) 20%, transparent 100%);
             pointer-events: none;
         }
         .dock { 
             display: flex; padding: 10px 20px; gap: 12px; 
-            background: rgba(255, 255, 255, 0.45); 
-            backdrop-filter: blur(40px) saturate(210%); 
-            -webkit-backdrop-filter: blur(40px) saturate(210%); 
-            border-radius: 40px; 
-            border: 1px solid rgba(255,255,255,0.7);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.12), 0 0 1px rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(40px) saturate(210%); 
+            -webkit-backdrop-filter: blur(40px) saturate(210%); border-radius: 40px; 
+            border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 10px 40px rgba(0,0,0,0.12);
             pointer-events: auto;
-            transform: translateZ(0); /* 开启 GPU 加速 */
         }
-        .dock-item { display: flex; flex-direction: column; align-items: center; width: 70px; opacity: 0.4; transition: 0.3s cubic-bezier(0.23, 1, 0.32, 1); cursor: pointer; }
+        .dock-item { display: flex; flex-direction: column; align-items: center; width: 70px; opacity: 0.4; transition: 0.3s; cursor: pointer; }
         .dock-item.active { opacity: 1; transform: translateY(-4px); }
-        .dock-text { font-size: 10px; font-weight: 700; margin-top: 3px; letter-spacing: 0.5px; }
+        .dock-text { font-size: 10px; font-weight: 700; margin-top: 3px; }
     </style>
 </head>
 <body>
@@ -149,7 +142,14 @@
                 <a href="https://github.com/nailong78" target="_blank" class="social-item">🐱</a>
                 <a href="https://t.me/NL78991" target="_blank" class="social-item">✈️</a>
             </div>
-            <div class="glass-card" style="text-align:left; margin-top:30px; cursor:default;">
+            
+            <div class="glass-card" style="text-align:left; margin-top:20px;" onclick="showLogs(event, this)">
+                <h3 style="font-size:16px;">📜 更新日志</h3>
+                <p style="font-size:11px; opacity:0.5; margin-top:4px;">查看 GitHub Actions 自动更新记录</p>
+                <div class="ripple-container"></div>
+            </div>
+
+            <div class="glass-card" style="text-align:left; margin-top:12px; cursor:default;">
                 <p style="font-size:13px; font-weight:700; color:var(--accent); margin-bottom:8px;">🚀 加速访问地址：</p>
                 <div style="background:rgba(0,0,0,0.03); padding:10px; border-radius:12px; font-family:monospace; font-size:11px; word-break:break-all;">
                     https://cdn.jsdelivr.net/gh/nailong78/nailong78.github.io@main/index.html
@@ -187,26 +187,50 @@
 <script>
     const user = "nailong78", repo = "nailong78.github.io";
 
-    const parallaxBg = document.getElementById('parallax-bg');
+    // 视差滚动
     window.addEventListener('scroll', () => {
         const scrolled = window.pageYOffset;
         requestAnimationFrame(() => {
-            parallaxBg.style.transform = `translateY(${scrolled * 0.2}px)`;
+            document.getElementById('parallax-bg').style.transform = `translateY(${scrolled * 0.2}px)`;
         });
     });
 
+    // 涟漪动效
     const createRipple = (event, element) => {
         const ripple = document.createElement("span");
         ripple.classList.add("ripple");
         const rect = element.getBoundingClientRect();
         const size = Math.max(rect.width, rect.height);
-        const x = event.clientX - rect.left - size / 2;
-        const y = event.clientY - rect.top - size / 2;
         ripple.style.width = ripple.style.height = `${size}px`;
-        ripple.style.left = `${x}px`;
-        ripple.style.top = `${y}px`;
+        ripple.style.left = `${event.clientX - rect.left - size/2}px`;
+        ripple.style.top = `${event.clientY - rect.top - size/2}px`;
         element.appendChild(ripple);
         setTimeout(() => ripple.remove(), 600);
+    };
+
+    // 智能提取 Actions 更新日志
+    const showLogs = async (e, el) => {
+        createRipple(e, el);
+        openWin('更新日志', '正在从 GitHub 获取最新的自动化构建记录...', false);
+        try {
+            const res = await fetch(`https://api.github.com/repos/${user}/${repo}/actions/runs?per_page=10`);
+            const data = await res.json();
+            let logMD = "";
+            data.workflow_runs.forEach((run, index) => {
+                const time = new Date(run.created_at).toLocaleString('zh-CN');
+                // 简单的关键词翻译逻辑
+                let msg = run.head_commit.message
+                    .replace(/Update/g, '更新')
+                    .replace(/Add/g, '新增')
+                    .replace(/Fix/g, '修复')
+                    .replace(/Delete/g, '删除')
+                    .replace(/workflow/g, '自动化流');
+                logMD += `**${index + 1}.** {gray:${time}}\n> ${msg}\n\n`;
+            });
+            openWin('更新日志', logMD || "暂无记录");
+        } catch (err) {
+            openWin('更新日志', '获取失败，请检查网络连接。');
+        }
     };
 
     const parseContent = (text) => {
@@ -218,9 +242,9 @@
             return `<a href="${match}" target="_blank" style="color:var(--accent);">访问链接</a>`;
         });
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                   .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                   .replace(/\{(.*?):(.*?)\}/g, '<span style="color:$1;">$2</span>');
-        return html.replace(/\n/g, '<br>');
+                   .replace(/\{gray:(.*?)\}/g, '<span style="opacity:0.4;font-size:12px;">$1</span>')
+                   .replace(/\n/g, '<br>');
+        return html;
     };
 
     const updateRuntime = () => {
