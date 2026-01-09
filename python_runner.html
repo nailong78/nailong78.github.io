@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 执行容器</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #050505; color: #fff; padding: 20px; }
+        .glass { background: rgba(255,255,255,0.1); backdrop-filter: blur(20px); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        pre { color: #00ff00; font-family: monospace; }
+        .back { color: #fff; text-decoration: none; display: inline-block; margin-bottom: 20px; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back">← 退出运行</a>
+    <div class="glass">
+        <h3 id="name">Python 运行环境</h3>
+        <hr style="opacity:0.1; margin: 15px 0;">
+        <pre id="output">正在初始化 Python 环境...</pre>
+    </div>
+    <script>
+        async function run() {
+            const params = new URLSearchParams(window.location.search);
+            const file = params.get('file');
+            document.getElementById('name').innerText = "正在执行: " + file;
+            let pyodide = await loadPyodide();
+            const code = await fetch(`apps/${file}`).then(res => res.text());
+            try {
+                let out = await pyodide.runPython(code);
+                document.getElementById('output').innerText = out || "执行成功 (无输出)";
+            } catch (err) {
+                document.getElementById('output').innerText = err;
+            }
+        }
+        run();
+    </script>
+</body>
+</html>
