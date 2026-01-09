@@ -30,12 +30,7 @@
         }
         .glass-card:active { transform: scale(0.97); }
         
-        .runtime-card {
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 24px; padding: 18px; text-align: center; margin-top: 10px;
-        }
+        .runtime-card { background: rgba(255, 255, 255, 0.5); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 24px; padding: 18px; text-align: center; margin-top: 10px; }
         #runtime-clock { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent); font-size: 15px; }
 
         .post-meta { font-size: 12px; opacity: 0.5; margin-top: 8px; font-weight: 500; display: flex; gap: 12px; }
@@ -43,38 +38,17 @@
         .profile-avatar { width: 100px; height: 100px; border-radius: 30px; margin-bottom: 15px; border: 4px solid #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         
         .social-row { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
-        .social-btn {
-            width: 45px; height: 45px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid);
-            border: 0.5px solid rgba(255, 255, 255, 0.4);
-            text-decoration: none; font-size: 20px; transition: 0.2s;
-        }
-        .social-btn:active { transform: scale(0.9); opacity: 0.8; }
+        .social-btn { width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.5); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 0.5px solid rgba(255, 255, 255, 0.4); text-decoration: none; font-size: 20px; transition: 0.2s; }
 
         .win-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(20px); display: none; z-index: 9000; opacity: 0; transition: 0.4s; align-items: center; justify-content: center; }
         .win-mask.show { display: flex; opacity: 1; }
         
-        /* 弹窗核心样式 */
-        .win-modal { 
-            width: 90%; max-width: 450px; height: 75vh; 
-            background: var(--glass-heavy); 
-            backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid);
-            border: 1px solid rgba(255,255,255,0.5); border-radius: 38px; 
-            display: flex; flex-direction: column; padding: 25px; 
-            transform: scale(0.9) translateY(30px); transition: 0.5s cubic-bezier(0.1, 1, 0.2, 1); 
-            z-index: 9001;
-        }
-        /* 全屏修复样式 */
-        .win-modal.full { 
-            width: 100% !important; 
-            height: 100% !important; 
-            max-width: none !important; 
-            border-radius: 0 !important; 
-            transform: none !important;
-        }
-        .win-mask.show .win-modal { transform: scale(1) translateY(0); }
+        .win-modal { width: 90%; max-width: 450px; height: 75vh; background: var(--glass-heavy); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 1px solid rgba(255,255,255,0.5); border-radius: 38px; display: flex; flex-direction: column; padding: 25px; transform: scale(0.9) translateY(30px); transition: 0.5s cubic-bezier(0.1, 1, 0.2, 1); }
+        .win-modal.full { width: 100% !important; height: 100% !important; max-width: none !important; border-radius: 0 !important; transform: none !important; padding: 0 !important; }
+        
+        /* 全屏标题栏压缩优化 */
+        .win-modal.full .win-header { padding: 12px 20px; margin-bottom: 0; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.2); }
+        .win-modal.full .win-body { padding: 20px; }
         .win-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .win-body { overflow-y: auto; flex: 1; line-height: 1.8; font-size: 17px; color: #1d1d1f; }
         .win-body img { display: block; width: 100%; height: auto; border-radius: 18px; margin: 15px 0; cursor: zoom-in; }
@@ -82,8 +56,7 @@
         .ios-close-btn { position: absolute; top: 40px; right: 25px; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.45); backdrop-filter: var(--ios-liquid); -webkit-backdrop-filter: var(--ios-liquid); border: 0.5px solid rgba(255, 255, 255, 0.3); z-index: 10002; cursor: pointer; color: #000; }
 
         #img-viewer { z-index: 10000; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); touch-action: pan-y; flex-direction: column; }
-        #img-viewer img { max-width: 100%; max-height: 100%; transition: transform 0.1s ease-out, opacity 0.2s; will-change: transform; -webkit-user-select: auto; user-select: auto; }
-        
+        #img-viewer img { max-width: 100%; max-height: 100%; transition: transform 0.1s ease-out, opacity 0.2s; }
         .img-counter { position: absolute; bottom: 40px; background: rgba(255,255,255,0.2); color: #fff; padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: 600; backdrop-filter: blur(10px); pointer-events: none; }
         .dl-btn { position: absolute; bottom: 85px; background: var(--accent); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 600; display: none; cursor: pointer; z-index: 10001; }
 
@@ -107,14 +80,9 @@
         </div>
         <span class="container-label">文章列表</span>
         <div id="post-list" class="posts-container"></div>
-        
         <span class="container-label">安全运行</span>
-        <div class="runtime-card">
-            <p style="font-size: 12px; font-weight: 600; opacity: 0.6; margin-bottom: 5px;">本站已安全运行</p>
-            <div id="runtime-clock">正在初始化...</div>
-        </div>
+        <div class="runtime-card"><p style="font-size: 12px; font-weight: 600; opacity: 0.6; margin-bottom: 5px;">本站已安全运行</p><div id="runtime-clock">正在初始化...</div></div>
     </div>
-
     <div id="p-about" class="page" style="display:none;">
         <div class="posts-container">
             <div class="profile-box">
@@ -125,7 +93,7 @@
                     <a href="https://t.me/NL78991" target="_blank" class="social-btn">✈️</a>
                 </div>
                 <div class="glass-card" style="text-align:left; margin-top:25px;">
-                    <p style="font-size:15px; opacity:0.8; line-height:1.6;">👋 你好！欢迎来到我的个人空间。这里记录了我的日常思考与技术探索。</p>
+                    <p style="font-size:15px; opacity:0.8; line-height:1.6;">👋 镜像加速页：<br><small style="color:var(--accent);">https://cdn.jsdelivr.net/gh/nailong78/nailong78.github.io@main/index.html</small></p>
                 </div>
             </div>
         </div>
@@ -135,8 +103,8 @@
 <div class="win-mask" id="win-mask">
     <div class="win-modal" id="win-modal">
         <div class="win-header">
-            <h3 id="win-title" style="font-size:20px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></h3>
-            <div style="display:flex; gap:8px;" id="win-ctrls">
+            <h3 id="win-title" style="font-size:18px; font-weight:700;"></h3>
+            <div style="display:flex; gap:8px;">
                 <div class="glass-btn" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:12px; cursor:pointer;" onclick="toggleFull()">🔳</div>
                 <div class="glass-btn" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:12px; cursor:pointer; color:#FF3B30;" onclick="closeWin()">✕</div>
             </div>
@@ -153,103 +121,54 @@
     <div id="img-counter" class="img-counter"></div>
 </div>
 
-<div class="dock-wrapper">
-    <div class="dock">
-        <div class="dock-item active" onclick="nav('home', this)"><span>🏠</span><span class="dock-text">首页</span></div>
-        <div class="dock-item" onclick="nav('about', this)"><span>👤</span><span class="dock-text">关于</span></div>
-    </div>
-</div>
+<div class="dock-wrapper"><div class="dock"><div class="dock-item active" onclick="nav('home', this)"><span>🏠</span><span class="dock-text">首页</span></div><div class="dock-item" onclick="nav('about', this)"><span>👤</span><span class="dock-text">关于</span></div></div></div>
 
 <script>
     const user = "nailong78", repo = "nailong78.github.io";
-    let currentImgList = [];
-    let currentImgIndex = 0;
-    let scale = 1, startDist = 0, startX = 0, lastTouchTime = 0;
-    const imgEl = document.getElementById('full-img'), viewer = document.getElementById('img-viewer'), counterEl = document.getElementById('img-counter'), dlBtn = document.getElementById('dl-btn');
-
     const updateRuntime = () => {
-        const start = new Date("2026-01-09 21:25:00").getTime();
-        const now = new Date().getTime();
-        const diff = now - start;
-        const d = Math.floor(diff / 86400000);
-        const h = Math.floor((diff % 86400000) / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
+        const start = new Date("2026-01-09 21:25:00").getTime(), now = new Date().getTime(), diff = now - start;
+        const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
         document.getElementById("runtime-clock").innerText = `${d}天 ${h}时 ${m}分 ${s}秒`;
     };
     setInterval(updateRuntime, 1000);
-
-    const updateCounter = () => {
-        const src = currentImgList[currentImgIndex];
-        counterEl.style.display = currentImgList.length > 1 ? 'block' : 'none';
-        if(currentImgList.length > 1) counterEl.innerText = `${currentImgIndex + 1} / ${currentImgList.length}`;
-        dlBtn.style.display = (src && src.startsWith('data:image')) ? 'block' : 'none';
-    };
-
-    const downloadCurrentImg = (e) => { e.stopPropagation(); const link = document.createElement('a'); link.href = currentImgList[currentImgIndex]; link.download = `img_${Date.now()}.png`; link.click(); };
-    viewer.addEventListener('touchstart', e => { lastTouchTime = Date.now(); if (e.touches.length === 2) startDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); else startX = e.touches[0].pageX; });
-    viewer.addEventListener('touchmove', e => { if (e.touches.length === 2 && startDist > 0) { const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); scale = Math.min(Math.max(1, dist / startDist), 4); imgEl.style.transform = `scale(${scale})`; } });
-    viewer.addEventListener('touchend', e => { if (Date.now() - lastTouchTime > 500) return; if (scale === 1 && e.changedTouches.length === 1) { const endX = e.changedTouches[0].pageX; if (startX - endX > 50) switchImg(1); else if (endX - startX > 50) switchImg(-1); } startDist = 0; });
-    const switchImg = (dir) => { if (currentImgList.length <= 1) return; currentImgIndex = (currentImgIndex + dir + currentImgList.length) % currentImgList.length; imgEl.style.opacity = 0; setTimeout(() => { imgEl.src = currentImgList[currentImgIndex]; imgEl.style.opacity = 1; updateCounter(); }, 150); };
-    const viewImage = (index, list) => { currentImgList = list; currentImgIndex = index; imgEl.src = list[index]; scale = 1; imgEl.style.transform = 'scale(1)'; viewer.style.display = 'flex'; updateCounter(); setTimeout(() => viewer.classList.add('show'), 50); history.pushState({view:'img'}, ''); };
-    const closeImageViewer = () => { if(viewer.classList.contains('show')) { viewer.classList.remove('show'); setTimeout(() => viewer.style.display = 'none', 400); if(history.state?.view === 'img') history.back(); } };
-    window.onpopstate = () => { 
-        if (viewer.style.display === 'flex') { viewer.classList.remove('show'); setTimeout(() => viewer.style.display = 'none', 400); } 
-        closeWin();
-    };
 
     const nav = (p, el) => { document.querySelectorAll('.page').forEach(s => s.style.display = 'none'); document.getElementById('p-'+p).style.display = 'block'; document.querySelectorAll('.dock-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); };
 
     const parseContent = (text) => {
         const urlRegex = /(https?:\/\/[^\s]+|data:image\/[a-zA-Z]+;base64,[^\s]+)/gi;
         const images = [];
-        let html = text.replace(urlRegex, (match) => { if (match.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(match)) { images.push(match); return `##IMG_${images.length - 1}##`; } return `<a href="${match}" target="_blank">查看链接</a>`; });
+        let html = text.replace(urlRegex, (match) => { if (match.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(match)) { images.push(match); return `##IMG_${images.length - 1}##`; } return `<a href="${match}" target="_blank">链接</a>`; });
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/_(.*?)_/g, '<span style="text-decoration:underline;">$1</span>').replace(/\{(.*?):(.*?)\}/g, '<span style="color:$1;">$2</span>');
         let finalHtml = html.replace(/\n/g, '<br>');
-        images.forEach((src, i) => { const listStr = JSON.stringify(images).replace(/"/g, '&quot;'); finalHtml = finalHtml.replace(`##IMG_${i}##`, `<img src="${src}" onclick="viewImage(${i}, ${listStr})">`); });
+        images.forEach((src, i) => { finalHtml = finalHtml.replace(`##IMG_${i}##`, `<img src="${src}" onclick="viewImage(${i}, ${JSON.stringify(images).replace(/"/g, '&quot;')})">`); });
         return finalHtml;
     };
 
     const openWin = (title, content, isNotice = false) => {
         const m = document.getElementById('win-mask'), b = document.getElementById('win-body'), modal = document.getElementById('win-modal');
-        document.getElementById('win-title').innerText = title; 
-        modal.classList.remove('full'); // 每次打开重置全屏状态
-        const cleanContent = content.replace(/^(日期：|作者：).*\n?/gm, '');
-        b.innerHTML = parseContent(cleanContent);
+        document.getElementById('win-title').innerText = title; modal.classList.remove('full');
+        b.innerHTML = parseContent(content.replace(/^(日期：|作者：).*\n?/gm, ''));
         document.getElementById('win-ctrls').style.display = isNotice ? 'none' : 'flex';
         document.getElementById('win-footer').style.display = isNotice ? 'block' : 'none';
         m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 50);
-        history.pushState({view:'post'}, '');
     };
 
-    const closeWin = () => { 
-        document.getElementById('win-mask').classList.remove('show'); 
-        setTimeout(() => document.getElementById('win-mask').style.display = 'none', 400); 
-    };
-    
-    // 修复的全屏切换函数
-    const toggleFull = () => {
-        document.getElementById('win-modal').classList.toggle('full');
-    };
+    const closeWin = () => { document.getElementById('win-mask').classList.remove('show'); setTimeout(() => document.getElementById('win-mask').style.display = 'none', 400); };
+    const toggleFull = () => document.getElementById('win-modal').classList.toggle('full');
+    const viewImage = (index, list) => { document.getElementById('full-img').src = list[index]; document.getElementById('img-viewer').style.display = 'flex'; setTimeout(() => document.getElementById('img-viewer').classList.add('show'), 50); };
+    const closeImageViewer = () => { document.getElementById('img-viewer').classList.remove('show'); setTimeout(() => document.getElementById('img-viewer').style.display = 'none', 400); };
 
     const init = async () => {
         updateRuntime();
-        fetch('announcement/notice.txt?v='+Date.now()).then(r => r.text()).then(t => { if(t.trim()) openWin('公告', t, true); });
         const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/posts?v=`+Date.now());
         if(res.ok) {
             const data = await res.json();
             const list = document.getElementById('post-list');
             for(const f of data.filter(f => f.name.endsWith('.txt'))) {
-                const r = await fetch(`posts/${f.name}?v=`+Date.now());
-                const fullText = await r.text();
-                const dateMatch = fullText.match(/^日期：(.*)$/m);
-                const authorMatch = fullText.match(/^作者：(.*)$/m);
+                const r = await fetch(`posts/${f.name}?v=`+Date.now()), fullText = await r.text();
+                const dM = fullText.match(/^日期：(.*)$/m), aM = fullText.match(/^作者：(.*)$/m);
                 const card = document.createElement('div'); card.className = 'glass-card';
-                let metaHtml = '';
-                if(dateMatch || authorMatch) {
-                    metaHtml = `<div class="post-meta">${dateMatch ? `<span>📅 ${dateMatch[1]}</span>` : ''}${authorMatch ? `<span>✍️ ${authorMatch[1]}</span>` : ''}</div>`;
-                }
-                card.innerHTML = `<h3 style="font-size:18px;">${f.name.replace('.txt','')}</h3>${metaHtml}`;
+                card.innerHTML = `<h3 style="font-size:18px;">${f.name.replace('.txt','')}</h3><div class="post-meta">${dM ? `<span>📅 ${dM[1]}</span>` : ''}${aM ? `<span>✍️ ${aM[1]}</span>` : ''}</div>`;
                 card.onclick = () => openWin(f.name.replace('.txt',''), fullText);
                 list.appendChild(card);
             }
