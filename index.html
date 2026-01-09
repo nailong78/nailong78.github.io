@@ -26,7 +26,6 @@
         }
         .glass-card:active { transform: scale(0.96); }
 
-        /* iOS 26 液态弹窗 */
         .win-mask { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(20px); 
             display: none; z-index: 9000; opacity: 0; transition: 0.4s; align-items: center; justify-content: center;
@@ -52,9 +51,14 @@
         .glass-btn:active { background: rgba(0,0,0,0.1); transform: scale(0.95); }
 
         .win-body { overflow-y: auto; flex: 1; line-height: 1.8; font-size: 17px; color: #1d1d1f; text-align: left; }
-        .win-body img { display: block; width: 100%; height: auto; border-radius: 18px; margin: 15px 0; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+        
+        /* 图片分辨率自动适配 */
+        .win-body img { 
+            display: block; width: 100%; height: auto; border-radius: 18px; 
+            margin: 15px 0; box-shadow: 0 8px 24px rgba(0,0,0,0.08); 
+            background: rgba(0,0,0,0.03);
+        }
 
-        /* 1:1 iOS 26 液态 Dock */
         .dock-wrapper { position: fixed; bottom: 30px; left: 0; right: 0; display: flex; justify-content: center; z-index: 8000; }
         .dock { 
             position: relative; display: flex; padding: 10px 20px; gap: 12px;
@@ -92,7 +96,7 @@
     <div id="p-about" class="page" style="display:none;">
         <div class="glass-card">
             <h2 style="margin-bottom:12px;">关于本站</h2>
-            <p style="font-size:16px; line-height:1.7; opacity:0.8;">遵循 iOS 26 规范设计。公告与文章现已采用统一的高沉浸感阅读布局。</p>
+            <p style="font-size:16px; line-height:1.7; opacity:0.8;">遵循 iOS 26 规范。图片链接现已支持自动解析与分辨率适配。</p>
         </div>
     </div>
 </div>
@@ -131,13 +135,17 @@
         el.classList.add('active');
     };
 
+    // 改进的解析逻辑
     const parseContent = (text) => {
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const urlRegex = /(https?:\/\/[^\s]+)/gi;
         return text.replace(urlRegex, (url) => {
-            if (/\.(jpg|jpeg|png|gif|webp)$/i.test(url.split('?')[0])) {
-                return `<img src="${url}" alt="Content Image">`;
+            // 清除可能存在的标点干扰
+            const cleanUrl = url.replace(/[()<>]/g, "");
+            // 匹配图片格式（包含带参数的链接）
+            if (/\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i.test(cleanUrl)) {
+                return `<img src="${cleanUrl}" alt="图片加载中...">`;
             }
-            return `<a href="${url}" target="_blank" style="color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent);">查看链接 🔗</a>`;
+            return `<a href="${cleanUrl}" target="_blank" style="color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent);">查看链接 🔗</a>`;
         }).replace(/\n/g, '<br>');
     };
 
@@ -151,7 +159,6 @@
         if(isNotice) {
             c.style.display = 'none'; 
             f.style.display = 'block';
-            b.style.textAlign = 'left';
         } else {
             c.style.display = 'flex';
             f.style.display = 'none';
