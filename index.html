@@ -6,94 +6,101 @@
     <title>Nailong78 Blog</title>
     <style>
         :root {
-            --bg-color: #050505; --text-main: #ffffff; --text-sub: rgba(255, 255, 255, 0.6);
+            --bg-color: #050505; --text-main: #ffffff; --text-sub: rgba(255, 255, 255, 0.5);
             --glass-bg: rgba(255, 255, 255, 0.08); --glass-border: rgba(255, 255, 255, 0.1);
-            --blob-1: rgba(120, 0, 255, 0.4); --blob-2: rgba(0, 100, 255, 0.4);
+            --blob-1: rgba(120, 0, 255, 0.3); --blob-2: rgba(0, 100, 255, 0.3);
         }
 
         body.light-mode {
-            --bg-color: #f2f4f6; --text-main: #1a1a1a; --text-sub: rgba(0, 0, 0, 0.6);
+            --bg-color: #f2f4f6; --text-main: #1a1a1a; --text-sub: rgba(0, 0, 0, 0.5);
             --glass-bg: rgba(255, 255, 255, 0.6); --glass-border: rgba(255, 255, 255, 0.8);
-            --blob-1: rgba(255, 100, 200, 0.3); --blob-2: rgba(0, 200, 255, 0.3);
+            --blob-1: rgba(255, 100, 200, 0.2); --blob-2: rgba(0, 200, 255, 0.2);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             background-color: var(--bg-color); color: var(--text-main);
-            min-height: 100vh; transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 100vh; transition: background 0.6s ease;
             overflow-x: hidden; padding-bottom: 100px;
         }
 
-        /* 液态背景 */
-        .background-blob { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; filter: blur(60px); }
-        .blob { position: absolute; border-radius: 50%; animation: move 15s infinite alternate; }
-        .blob-1 { top: -10%; left: -10%; width: 300px; height: 300px; background: var(--blob-1); }
-        .blob-2 { bottom: 10%; right: -10%; width: 350px; height: 350px; background: var(--blob-2); }
-        @keyframes move { from { transform: translate(0,0); } to { transform: translate(40px, 60px); } }
+        /* 极致流畅背景：使用 will-change 优化 */
+        .background-blob { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; filter: blur(60px); will-change: transform; }
+        .blob { position: absolute; border-radius: 50%; animation: move 20s infinite alternate linear; }
+        .blob-1 { top: -5%; left: -5%; width: 250px; height: 250px; background: var(--blob-1); }
+        .blob-2 { bottom: 10%; right: -5%; width: 300px; height: 300px; background: var(--blob-2); }
+        @keyframes move { from { transform: translate3d(0,0,0); } to { transform: translate3d(30px, 50px, 0); } }
 
-        .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 20px; }
+        .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 15px 20px; }
 
-        /* 顶部控制栏 */
-        .header { display: flex; justify-content: flex-end; position: relative; padding: 10px 0; }
-        
-        /* 切换按钮 */
+        /* 顶部导航：标题 + 每日一言 + 开关 */
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            height: 48px; margin-bottom: 25px;
+        }
+        .header-info { display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+        .site-title { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+        #hitokoto { 
+            font-size: 11px; color: var(--text-sub); 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+            margin-top: 2px; max-width: 260px;
+        }
+
+        .theme-control { position: relative; }
         .theme-btn {
-            width: 45px; height: 45px; border-radius: 50%; background: var(--glass-bg);
-            border: 1px solid var(--glass-border); backdrop-filter: blur(20px);
-            display: flex; align-items: center; justify-content: center; font-size: 20px;
-            cursor: pointer; z-index: 101; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            width: 44px; height: 44px; border-radius: 16px; /* iOS 26 矩形圆角 */
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+            cursor: pointer; z-index: 101; transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
         }
-        .theme-btn:active { transform: scale(0.9); }
 
-        /* 液态玻璃弹出菜单 */
+        /* 弹出菜单优化 */
         .theme-menu {
-            position: absolute; top: 65px; right: 0; width: 160px;
-            background: var(--glass-bg); backdrop-filter: blur(30px) saturate(180%);
-            border: 1px solid var(--glass-border); border-radius: 24px;
-            padding: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            display: none; flex-direction: column; gap: 4px; z-index: 100;
-            transform-origin: top right; animation: menuShow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: absolute; top: 55px; right: 0; width: 150px;
+            background: var(--glass-bg); backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            padding: 6px; display: none; flex-direction: column; z-index: 102;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            animation: ios-pop 0.4s cubic-bezier(0.15, 1, 0.3, 1);
         }
-        @keyframes menuShow {
-            from { opacity: 0; transform: scale(0.5) translateY(-20px); filter: blur(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        @keyframes ios-pop {
+            from { opacity: 0; transform: scale(0.8) translateY(-10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
         .menu-item {
-            padding: 12px 16px; border-radius: 16px; font-size: 14px; font-weight: 500;
-            color: var(--text-main); cursor: pointer; transition: 0.2s;
-            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px; border-radius: 14px; font-size: 13px; font-weight: 500;
+            cursor: pointer; transition: background 0.2s;
         }
-        .menu-item:hover { background: rgba(255,255,255,0.1); }
-        .menu-item.active { background: rgba(255,255,255,0.2); }
+        .menu-item:active { background: rgba(255,255,255,0.15); }
 
-        /* 卡片通用 */
+        /* 通用卡片 */
         .glass-card {
-            background: var(--glass-bg); backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border); border-radius: 30px;
-            padding: 24px; margin-bottom: 20px;
+            background: var(--glass-bg); backdrop-filter: blur(25px) saturate(150%);
+            -webkit-backdrop-filter: blur(25px) saturate(150%);
+            border: 1px solid var(--glass-border); border-radius: 28px;
+            padding: 22px; margin-bottom: 18px; transform: translate3d(0,0,0);
         }
 
-        /* 个人信息 */
-        .profile { text-align: center; }
-        .avatar { width: 90px; height: 90px; border-radius: 50%; margin-bottom: 15px; border: 2px solid var(--glass-border); }
-        
-        /* 关于页面内容 (默认隐藏，通过JS切换) */
-        #main-content, #about-content { transition: 0.4s; }
-        .hidden { display: none; }
+        /* 隐藏逻辑 */
+        .hidden { display: none; opacity: 0; }
+        #main-content, #about-content { transition: opacity 0.3s ease; }
 
         /* 底部Dock */
         .dock {
-            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-            background: var(--glass-bg); backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border); padding: 12px 30px;
-            border-radius: 100px; display: flex; gap: 40px; z-index: 99;
+            position: fixed; bottom: 25px; left: 50%; transform: translate3d(-50%, 0, 0);
+            background: var(--glass-bg); backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px); border: 1px solid var(--glass-border);
+            padding: 10px 35px; border-radius: 100px; display: flex; gap: 40px; z-index: 99;
         }
-        .dock-item { color: var(--text-main); text-decoration: none; font-size: 14px; opacity: 0.5; transition: 0.3s; cursor: pointer; }
-        .dock-item.active { opacity: 1; font-weight: 700; }
+        .dock-item { font-size: 13px; font-weight: 600; opacity: 0.4; transition: 0.3s; cursor: pointer; }
+        .dock-item.active { opacity: 1; transform: scale(1.1); }
     </style>
 </head>
-<body class="dark-mode">
+<body>
 
     <div class="background-blob">
         <div class="blob blob-1"></div>
@@ -101,35 +108,40 @@
     </div>
 
     <div class="container">
-        <div class="header">
-            <div class="theme-btn" id="themeBtn">🌓</div>
-            <div class="theme-menu" id="themeMenu">
-                <div class="menu-item" data-mode="auto">自动 (日落) <span id="auto-check"></span></div>
-                <div class="menu-item" data-mode="light">亮色模式</div>
-                <div class="menu-item" data-mode="dark">暗色模式</div>
+        <div class="top-bar">
+            <div class="header-info">
+                <span class="site-title">奶龙的个人博客</span>
+                <div id="hitokoto">正在加载科技箴言...</div>
+            </div>
+            <div class="theme-control">
+                <div class="theme-btn" id="themeBtn">🌓</div>
+                <div class="theme-menu" id="themeMenu">
+                    <div class="menu-item" data-mode="auto">自动模式</div>
+                    <div class="menu-item" data-mode="light">亮色</div>
+                    <div class="menu-item" data-mode="dark">暗色</div>
+                </div>
             </div>
         </div>
 
         <div id="main-content">
-            <div class="glass-card profile">
-                <img src="https://github.com/nailong78.png" class="avatar">
-                <h1>Nailong78</h1>
-                <p style="color:var(--text-sub); margin-top:8px;">你好，这里是我的数字花园。</p>
+            <div class="glass-card" style="text-align: center;">
+                <img src="https://github.com/nailong78.png" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px;">
+                <h2 style="font-size: 20px;">欢迎回来</h2>
             </div>
             <div class="glass-card">
-                <h3 style="margin-bottom:10px;">最近动态</h3>
-                <p style="font-size:14px; color:var(--text-sub);">正在使用 GitHub Actions 探索自动化部署的无限可能...</p>
+                <p style="font-size: 14px; opacity: 0.8; line-height: 1.6;">
+                    科技的本质是人类意志的延伸。在这里，我记录对数字世界的思考。
+                </p>
             </div>
         </div>
 
         <div id="about-content" class="hidden">
             <div class="glass-card">
-                <h2>关于我</h2>
-                <p style="margin-top:15px; line-height:1.6;">
-                    我是 <b>Nailong78</b>。<br><br>
-                    这是一个完全基于 GitHub 生态构建的博客。我追求极致的简洁与流畅的动效，这便是我模仿 iOS 26 设计此站的原因。<br><br>
-                    技能：HTML / CSS / 审美驱动开发 / 云端办公<br>
-                    坐标：互联网的某个角落
+                <h3 style="margin-bottom: 10px;">关于本站</h3>
+                <p style="font-size: 14px; line-height: 1.8;">
+                    <b>设计：</b> iOS 26 液态玻璃风格<br>
+                    <b>架构：</b> 纯 GitHub Pages 无本地操作<br>
+                    <b>接口：</b> Hitokoto API 驱动每日一言
                 </p>
             </div>
         </div>
@@ -141,69 +153,65 @@
     </div>
 
     <script>
+        // 1. 获取每日一言 (科技类参数: c=e)
+        fetch('https://v1.hitokoto.cn?c=e')
+            .then(response => response.json())
+            .then(data => {
+                const hitokoto = document.getElementById('hitokoto');
+                hitokoto.innerText = `“${data.hitokoto}”`;
+            })
+            .catch(console.error);
+
+        // 2. 主题管理
         const themeBtn = document.getElementById('themeBtn');
         const themeMenu = document.getElementById('themeMenu');
         const body = document.body;
-        let currentMode = localStorage.getItem('theme-mode') || 'auto';
+        let mode = localStorage.getItem('blog-mode') || 'auto';
 
-        // 1. 主题切换逻辑
-        function updateTheme() {
+        function applyTheme() {
             const hour = new Date().getHours();
-            const isNight = hour >= 18 || hour < 6; // 假设18点日落，6点日出
-
-            if (currentMode === 'auto') {
+            const isNight = hour >= 18 || hour < 6;
+            
+            if (mode === 'auto') {
                 isNight ? body.classList.remove('light-mode') : body.classList.add('light-mode');
-                document.getElementById('auto-check').innerText = '✓';
             } else {
-                currentMode === 'light' ? body.classList.add('light-mode') : body.classList.remove('light-mode');
-                document.getElementById('auto-check').innerText = '';
+                mode === 'light' ? body.classList.add('light-mode') : body.classList.remove('light-mode');
             }
             themeBtn.innerText = body.classList.contains('light-mode') ? '☀️' : '🌙';
         }
 
-        // 按钮点击弹出菜单
         themeBtn.onclick = (e) => {
             e.stopPropagation();
             themeMenu.style.display = themeMenu.style.display === 'flex' ? 'none' : 'flex';
         };
 
-        // 菜单项点击
         document.querySelectorAll('.menu-item').forEach(item => {
             item.onclick = function() {
-                currentMode = this.dataset.mode;
-                localStorage.setItem('theme-mode', currentMode);
-                updateTheme();
+                mode = this.dataset.mode;
+                localStorage.setItem('blog-mode', mode);
+                applyTheme();
                 themeMenu.style.display = 'none';
             };
         });
 
-        // 点击空白处关闭菜单
         document.onclick = () => themeMenu.style.display = 'none';
 
-        // 2. 关于页面切换逻辑
-        const mainContent = document.getElementById('main-content');
-        const aboutContent = document.getElementById('about-content');
+        // 3. 页面切换
         const navHome = document.getElementById('nav-home');
         const navAbout = document.getElementById('nav-about');
+        const main = document.getElementById('main-content');
+        const about = document.getElementById('about-content');
 
         navAbout.onclick = () => {
-            mainContent.classList.add('hidden');
-            aboutContent.classList.remove('hidden');
-            navAbout.classList.add('active');
-            navHome.classList.remove('active');
+            main.classList.add('hidden'); about.classList.remove('hidden');
+            navAbout.classList.add('active'); navHome.classList.remove('active');
         };
-
         navHome.onclick = () => {
-            aboutContent.classList.add('hidden');
-            mainContent.classList.remove('hidden');
-            navHome.classList.add('active');
-            navAbout.classList.remove('active');
+            about.classList.add('hidden'); main.classList.remove('hidden');
+            navHome.classList.add('active'); navAbout.classList.remove('active');
         };
 
-        // 初始化
-        updateTheme();
-        // 每分钟检查一次时间（针对自动模式）
-        setInterval(updateTheme, 60000);
+        applyTheme();
     </script>
 </body>
 </html>
