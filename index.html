@@ -19,7 +19,6 @@
         .header { margin-bottom: 35px; }
         .site-title { font-size: 28px; font-weight: 800; letter-spacing: -1.2px; }
 
-        /* 卡片层 */
         .glass-card { 
             background: var(--glass-light); border: 1px solid var(--border); border-radius: 24px; 
             padding: 22px; margin-bottom: 15px; backdrop-filter: blur(15px);
@@ -33,7 +32,7 @@
             display: none; z-index: 9000; opacity: 0; transition: 0.4s; align-items: center; justify-content: center;
         }
         .win-modal { 
-            width: 90%; max-width: 450px; height: 70vh; background: var(--glass-heavy); 
+            width: 90%; max-width: 450px; height: 75vh; background: var(--glass-heavy); 
             border: 1px solid rgba(255,255,255,0.5); border-radius: 38px;
             display: flex; flex-direction: column; padding: 25px;
             transform: scale(0.9) translateY(30px); transition: 0.5s cubic-bezier(0.1, 1, 0.2, 1);
@@ -70,7 +69,9 @@
         .dock-item.active { opacity: 1; transform: translateY(-2px); }
         .dock-text { font-size: 10px; font-weight: 700; margin-top: 3px; }
 
-        .confirm-btn { background: var(--accent); color: #fff; border: none; padding: 14px 40px; border-radius: 18px; font-weight: 700; cursor: pointer; }
+        .confirm-area { text-align: center; padding-top: 20px; border-top: 1px solid var(--border); margin-top: 10px; }
+        .confirm-btn { background: var(--accent); color: #fff; border: none; padding: 14px 45px; border-radius: 18px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .confirm-btn:active { transform: scale(0.95); opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -91,7 +92,7 @@
     <div id="p-about" class="page" style="display:none;">
         <div class="glass-card">
             <h2 style="margin-bottom:12px;">关于本站</h2>
-            <p style="font-size:16px; line-height:1.7; opacity:0.8;">iOS 26 设计规范。自动同步机制已启用，确保每次访问均获取最新公告。</p>
+            <p style="font-size:16px; line-height:1.7; opacity:0.8;">遵循 iOS 26 规范设计。公告与文章现已采用统一的高沉浸感阅读布局。</p>
         </div>
     </div>
 </div>
@@ -106,6 +107,9 @@
             </div>
         </div>
         <div id="win-body" class="win-body"></div>
+        <div id="win-footer" class="confirm-area" style="display:none;">
+            <button class="confirm-btn" onclick="closeWin()">确认接收</button>
+        </div>
     </div>
 </div>
 
@@ -118,8 +122,6 @@
 
 <script>
     const user = "nailong78", repo = "nailong78.github.io";
-
-    // 获取当前时间戳，防止缓存
     const v = () => `?v=${new Date().getTime()}`;
 
     const nav = (p, el) => {
@@ -133,7 +135,7 @@
         const urlRegex = /(https?:\/\/[^\s]+)/g;
         return text.replace(urlRegex, (url) => {
             if (/\.(jpg|jpeg|png|gif|webp)$/i.test(url.split('?')[0])) {
-                return `<img src="${url}" alt="Image">`;
+                return `<img src="${url}" alt="Content Image">`;
             }
             return `<a href="${url}" target="_blank" style="color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent);">查看链接 🔗</a>`;
         }).replace(/\n/g, '<br>');
@@ -141,15 +143,18 @@
 
     const openWin = (title, content, isNotice = false) => {
         const m = document.getElementById('win-mask'), v_mod = document.getElementById('win-modal');
-        const b = document.getElementById('win-body'), c = document.getElementById('win-ctrls');
+        const b = document.getElementById('win-body'), c = document.getElementById('win-ctrls'), f = document.getElementById('win-footer');
         document.getElementById('win-title').innerText = title;
         
+        b.innerHTML = parseContent(content);
+
         if(isNotice) {
-            c.style.display = 'none';
-            b.innerHTML = `<center style="padding:10px 0;"><span style="font-size:45px;">🔔</span><div style="margin-top:15px; font-weight:500;">${parseContent(content)}</div><button class="confirm-btn" onclick="closeWin()" style="margin-top:30px;">确认接收</button></center>`;
+            c.style.display = 'none'; 
+            f.style.display = 'block';
+            b.style.textAlign = 'left';
         } else {
             c.style.display = 'flex';
-            b.innerHTML = parseContent(content);
+            f.style.display = 'none';
         }
 
         m.style.display = 'flex';
@@ -166,12 +171,10 @@
     const toggleFull = () => document.getElementById('win-modal').classList.toggle('full');
 
     const init = async () => {
-        // 1. 公告初始化 (追加版本号 v())
         fetch('announcement/notice.txt' + v()).then(r => r.text()).then(t => {
             if(t.trim().length > 1) openWin('系统公告', t, true);
         }).catch(() => {});
 
-        // 2. 文章列表初始化
         try {
             const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/posts` + v());
             if(res.ok) {
