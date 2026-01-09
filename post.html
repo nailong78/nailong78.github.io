@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>文章详情 - Nailong78</title>
+    <title>阅读 - Nailong78</title>
     <style>
         :root {
             --bg-color: #050505; --text-main: #ffffff; --text-sub: rgba(255, 255, 255, 0.5);
@@ -14,79 +14,39 @@
             --glass-bg: rgba(255, 255, 255, 0.6); --glass-border: rgba(255, 255, 255, 0.8);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            background-color: var(--bg-color); color: var(--text-main);
-            line-height: 1.7; transition: background 0.5s;
-        }
-        .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 80px 25px 50px; }
-        
-        /* 顶部回退按钮 */
-        .back-nav {
-            position: fixed; top: 20px; left: 20px; z-index: 100;
-            padding: 8px 16px; border-radius: 100px;
-            background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border); font-size: 14px; font-weight: 600;
-            cursor: pointer; color: var(--text-main); text-decoration: none;
-            transition: 0.3s cubic-bezier(0.2, 0, 0, 1);
-        }
-        .back-nav:active { transform: scale(0.9); }
-
-        /* 文章排版 */
-        h1 { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
-        .meta { font-size: 13px; color: var(--text-sub); margin-bottom: 30px; }
-        .content { font-size: 16px; opacity: 0.9; }
-        .content p { margin-bottom: 20px; }
-        
-        /* 图片卡片样式 */
-        .post-img { 
-            width: 100%; height: 200px; border-radius: 24px; 
-            background: linear-gradient(45deg, #7800ff, #0064ff);
-            margin-bottom: 30px; object-fit: cover;
-        }
+        body { font-family: -apple-system, sans-serif; background: var(--bg-color); color: var(--text-main); transition: 0.5s; }
+        .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 100px 25px 50px; }
+        .back-nav { position: fixed; top: 30px; left: 20px; z-index: 100; padding: 10px 20px; border-radius: 100px; background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); color: var(--text-main); text-decoration: none; font-size: 14px; font-weight: 600; }
+        h1 { font-size: 32px; font-weight: 800; margin-bottom: 20px; line-height: 1.2; }
+        .content { font-size: 17px; line-height: 1.8; opacity: 0.9; white-space: pre-wrap; }
+        .loading { text-align: center; margin-top: 50px; opacity: 0.5; }
     </style>
 </head>
 <body>
     <a href="index.html" class="back-nav">← 返回</a>
-
     <div class="container">
-        <div class="post-img" id="postImage"></div>
-        <h1 id="title">正在加载...</h1>
-        <div class="meta" id="date">2026-01-09</div>
-        <div class="content" id="content">
-            </div>
+        <h1 id="postTitle">加载中...</h1>
+        <div id="postContent" class="content">
+            <div class="loading">正在连接数字花园...</div>
+        </div>
     </div>
 
     <script>
-        // 根据 URL 参数加载内容
         const params = new URLSearchParams(window.location.search);
-        const postId = params.get('id');
+        const fileName = params.get('file');
+        
+        if (fileName) {
+            document.getElementById('postTitle').innerText = fileName.replace('.txt', '');
+            // 自动从 posts 文件夹获取
+            fetch(`posts/${fileName}`)
+                .then(res => res.ok ? res.text() : "文章去星际旅行了...")
+                .then(text => {
+                    document.getElementById('postContent').innerText = text;
+                });
+        }
 
-        // 这里模拟一个数据库，以后你可以往这里加新文章
-        const postData = {
-            'first-post': {
-                title: "我的第一篇 iOS 26 风格博客",
-                content: "<p>欢迎来到我的数字花园！</p><p>这是基于纯 HTML/CSS 构建的沉浸式阅读页面。在这里，每一个像素都经过了精心打磨，旨在提供极致的视觉愉悦感。</p><p>科技不应该是冰冷的，它应该像液体一样流动，像玻璃一样通透。</p>",
-                date: "2026年1月9日"
-            },
-            'tech-future': {
-                title: "论 AI 时代的审美趋势",
-                content: "<p>随着 AI 介入设计，未来的界面将不再是死板的方块...</p>",
-                date: "2026年1月10日"
-            }
-        };
-
-        const post = postData[postId] || postData['first-post'];
-        document.getElementById('title').innerText = post.title;
-        document.getElementById('content').innerHTML = post.content;
-        document.getElementById('date').innerText = post.date;
-
-        // 继承首页的暗色模式状态
-        if (localStorage.getItem('blog-mode') === 'light') {
+        if (localStorage.getItem('blog-mode') === 'light' || (localStorage.getItem('blog-mode') === 'auto' && new Date().getHours() >= 6 && new Date().getHours() < 18)) {
             document.body.classList.add('light-mode');
-        } else if (localStorage.getItem('blog-mode') === 'auto') {
-            const isNight = new Date().getHours() >= 18 || new Date().getHours() < 6;
-            if (!isNight) document.body.classList.add('light-mode');
         }
     </script>
 </body>
