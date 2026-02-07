@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章详情 - nailong's Blog</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="container">
+            <h1 class="logo"><a href="index.html" style="text-decoration: none; color: var(--primary-color);">nailong's Blog</a></h1>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="index.html#posts">文章</a></li>
+                    <li><a href="about.html">关于</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="post-container">
+            <!-- 文章内容将通过JavaScript动态生成 -->
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>加载中...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 nailong's Blog</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script src="js/markdown.js"></script>
+    <script>
+        // 页面加载完成后初始化博客
+        window.addEventListener('DOMContentLoaded', async function() {
+            const postManager = new PostManager();
+            const urlParams = new URLSearchParams(window.location.search);
+            const slug = urlParams.get('slug');
+            
+            if (slug) {
+                const post = await postManager.getPostBySlug(slug);
+                const postContainer = document.querySelector('.post-container');
+                if (postContainer) {
+                    postContainer.innerHTML = postManager.generatePostHTML(post);
+                }
+            } else {
+                const postContainer = document.querySelector('.post-container');
+                if (postContainer) {
+                    postContainer.innerHTML = '<p>文章不存在</p>';
+                }
+            }
+        });
+    </script>
+    <style>
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 122, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+    </style>
+</body>
+</html>
