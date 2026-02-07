@@ -9,12 +9,13 @@
 :root {
     --primary-color: #007AFF;
     --background-color: #F2F2F7;
-    --card-background: rgba(255, 255, 255, 0.7);
+    --card-background: rgba(255, 255, 255, 0.8);
     --text-primary: #000000;
     --text-secondary: #8E8E93;
-    --border-radius: 16px;
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    --glass-effect: backdrop-filter: blur(10px);
+    --border-radius: 20px;
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --glass-effect: backdrop-filter: blur(20px);
+    --border-glow: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* 基础样式 */
@@ -23,8 +24,9 @@ body {
     background-color: var(--background-color);
     color: var(--text-primary);
     line-height: 1.6;
-    background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background-image: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 /* 容器样式 */
@@ -36,20 +38,23 @@ body {
 
 /* 导航栏样式 */
 .navbar {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     position: sticky;
     top: 0;
     z-index: 1000;
     padding: 1rem 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .logo {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--primary-color);
+    text-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);
 }
 
 .nav-menu ul {
@@ -62,23 +67,26 @@ body {
     text-decoration: none;
     color: var(--text-primary);
     font-weight: 500;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
+    padding: 0.5rem 0;
 }
 
 .nav-menu a:hover {
     color: var(--primary-color);
+    transform: translateY(-2px);
 }
 
 .nav-menu a::after {
     content: '';
     position: absolute;
-    bottom: -5px;
+    bottom: 0;
     left: 0;
     width: 0;
-    height: 2px;
-    background-color: var(--primary-color);
-    transition: width 0.3s ease;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), rgba(0, 122, 255, 0.5));
+    border-radius: 1.5px;
+    transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .nav-menu a:hover::after {
@@ -88,24 +96,44 @@ body {
 /* 英雄区域样式 */
 .hero {
     text-align: center;
-    padding: 4rem 0;
-    background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    padding: 5rem 2rem;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-radius: var(--border-radius);
     margin: 2rem 0;
     box-shadow: var(--shadow);
+    border: var(--border-glow);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 8s infinite linear;
+    z-index: 0;
 }
 
 .hero h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+    font-size: 2.8rem;
+    margin-bottom: 1.2rem;
     color: var(--text-primary);
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .hero p {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     color: var(--text-secondary);
+    position: relative;
+    z-index: 1;
 }
 
 /* 文章卡片样式 */
@@ -113,34 +141,56 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 2rem;
-    margin: 2rem 0;
+    margin: 3rem 0;
 }
 
 .post-card {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-radius: var(--border-radius);
-    padding: 2rem;
+    padding: 2.2rem;
     box-shadow: var(--shadow);
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: var(--border-glow);
+    position: relative;
+    overflow: hidden;
+}
+
+.post-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), rgba(0, 122, 255, 0.5));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .post-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+}
+
+.post-card:hover::before {
+    transform: scaleX(1);
 }
 
 .post-card h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+    font-size: 1.6rem;
+    margin-bottom: 1.2rem;
+    position: relative;
+    z-index: 1;
 }
 
 .post-card h3 a {
     text-decoration: none;
     color: var(--text-primary);
-    transition: color 0.3s ease;
+    transition: color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
 }
 
 .post-card h3 a:hover {
@@ -150,12 +200,17 @@ body {
 .post-meta {
     font-size: 0.9rem;
     color: var(--text-secondary);
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
+    position: relative;
+    z-index: 1;
 }
 
 .post-excerpt {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.8rem;
     color: var(--text-primary);
+    position: relative;
+    z-index: 1;
+    line-height: 1.7;
 }
 
 .read-more {
@@ -163,19 +218,21 @@ body {
     text-decoration: none;
     color: var(--primary-color);
     font-weight: 500;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
+    z-index: 1;
+    padding: 0.5rem 0;
 }
 
 .read-more:hover {
-    transform: translateX(5px);
+    transform: translateX(8px);
 }
 
 .read-more::after {
     content: '→';
     position: absolute;
     right: -15px;
-    transition: right 0.3s ease;
+    transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .read-more:hover::after {
@@ -186,27 +243,40 @@ body {
 .article {
     max-width: 800px;
     margin: 2rem auto;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-radius: var(--border-radius);
     padding: 3rem;
     box-shadow: var(--shadow);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: var(--border-glow);
+    position: relative;
+    overflow: hidden;
+}
+
+.article::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), rgba(0, 122, 255, 0.5));
 }
 
 .article h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+    font-size: 2.8rem;
+    margin-bottom: 1.5rem;
     color: var(--text-primary);
+    line-height: 1.2;
 }
 
 .article-meta {
     font-size: 1rem;
     color: var(--text-secondary);
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .article-content {
@@ -214,17 +284,19 @@ body {
 }
 
 .article-content h2 {
-    font-size: 2rem;
-    margin: 2rem 0 1rem;
+    font-size: 2.2rem;
+    margin: 2.5rem 0 1.2rem;
+    color: var(--text-primary);
 }
 
 .article-content h3 {
-    font-size: 1.5rem;
-    margin: 1.5rem 0 1rem;
+    font-size: 1.7rem;
+    margin: 2rem 0 1.2rem;
+    color: var(--text-primary);
 }
 
 .article-content p {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.8rem;
     font-size: 1.1rem;
     line-height: 1.8;
 }
@@ -232,100 +304,350 @@ body {
 .article-content img {
     max-width: 100%;
     height: auto;
-    border-radius: 8px;
-    margin: 2rem 0;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    margin: 2.5rem 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.article-content img:hover {
+    transform: scale(1.02);
 }
 
 .article-content blockquote {
     border-left: 4px solid var(--primary-color);
-    padding-left: 1.5rem;
-    margin: 2rem 0;
+    padding-left: 1.8rem;
+    margin: 2.5rem 0;
     color: var(--text-secondary);
     font-style: italic;
+    background: rgba(0, 122, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 0 12px 12px 0;
 }
 
 .article-content code {
-    background-color: rgba(0, 0, 0, 0.05);
-    padding: 0.2rem 0.4rem;
-    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.08);
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 0.9rem;
+    color: #e11d48;
 }
 
 .article-content pre {
-    background-color: rgba(0, 0, 0, 0.05);
-    padding: 1.5rem;
-    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.08);
+    padding: 1.8rem;
+    border-radius: 12px;
     overflow-x: auto;
-    margin: 2rem 0;
+    margin: 2.5rem 0;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .article-content pre code {
     background: none;
     padding: 0;
+    color: var(--text-primary);
 }
 
 .article-content ul,
 .article-content ol {
-    margin-bottom: 1.5rem;
-    padding-left: 2rem;
+    margin-bottom: 1.8rem;
+    padding-left: 2.5rem;
 }
 
 .article-content li {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
+    line-height: 1.6;
 }
 
 /* 页脚样式 */
 .footer {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 2rem 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 2.5rem 0;
     text-align: center;
-    margin-top: 4rem;
+    margin-top: 5rem;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .footer p {
     color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        box-shadow: 0 12px 48px rgba(0, 122, 255, 0.15);
+    }
+}
+
+.post-card {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.hero {
+    animation: fadeIn 0.8s ease-out, pulse 4s infinite ease-in-out;
+}
+
+/* 暗黑模式 */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: #1C1C1E;
+        --card-background: rgba(32, 32, 34, 0.85);
+        --text-primary: #FFFFFF;
+        --text-secondary: #A1A1A6;
+        --border-glow: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    body {
+        background-image: linear-gradient(135deg, #1a1a1a 0%, #2c2c34 100%);
+    }
+
+    .navbar,
+    .hero,
+    .post-card,
+    .article,
+    .footer {
+        background: rgba(32, 32, 34, 0.85);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero::before {
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    }
+
+    .article-content code,
+    .article-content pre {
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .article-content blockquote {
+        background: rgba(0, 122, 255, 0.1);
+    }
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
     .navbar {
-        padding: 1rem;
+        padding: 0.8rem 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .logo {
+        font-size: 1.2rem;
     }
 
     .nav-menu ul {
-        gap: 1rem;
+        gap: 0.8rem;
+    }
+
+    .nav-menu a {
+        font-size: 0.9rem;
     }
 
     .hero {
-        padding: 2rem 0;
+        padding: 3rem 1.5rem;
         margin: 1rem 0;
+        border-radius: 20px;
     }
 
     .hero h2 {
         font-size: 2rem;
+        line-height: 1.2;
+    }
+
+    .hero p {
+        font-size: 1rem;
+        margin-top: 0.8rem;
     }
 
     .posts {
         grid-template-columns: 1fr;
-        gap: 1rem;
+        gap: 1.5rem;
+        margin: 1.5rem 0;
     }
 
     .post-card {
-        padding: 1.5rem;
+        padding: 1.8rem;
+        border-radius: 20px;
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .post-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .post-card h3 {
+        font-size: 1.3rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .post-meta {
+        font-size: 0.85rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .post-excerpt {
+        font-size: 0.95rem;
+        line-height: 1.6;
     }
 
     .article {
-        padding: 2rem;
+        padding: 2.5rem 1.8rem;
         margin: 1rem;
+        border-radius: 20px;
     }
 
     .article h1 {
         font-size: 2rem;
+        line-height: 1.2;
+        margin-bottom: 1.2rem;
+    }
+
+    .article-meta {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .article-content h2 {
+        font-size: 1.6rem;
+        margin: 1.8rem 0 1rem;
+    }
+
+    .article-content h3 {
+        font-size: 1.3rem;
+        margin: 1.5rem 0 0.8rem;
+    }
+
+    .article-content p {
+        font-size: 1rem;
+        line-height: 1.7;
+        margin-bottom: 1.3rem;
+    }
+
+    .article-content ul,
+    .article-content ol {
+        margin-bottom: 1.3rem;
+        padding-left: 1.5rem;
+    }
+
+    .article-content li {
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .article-content blockquote {
+        margin: 1.5rem 0;
+        padding-left: 1.2rem;
+    }
+
+    .article-content pre {
+        padding: 1.2rem;
+        margin: 1.5rem 0;
+    }
+
+    .article-content code {
+        font-size: 0.85rem;
+    }
+
+    .footer {
+        padding: 1.5rem 0;
+        margin-top: 3rem;
+    }
+}
+
+/* 手机端竖屏优化 */
+@media (max-width: 480px) {
+    .navbar {
+        padding: 0.7rem 1rem;
+    }
+
+    .logo {
+        font-size: 1.1rem;
+    }
+
+    .nav-menu ul {
+        gap: 0.6rem;
+    }
+
+    .nav-menu a {
+        font-size: 0.85rem;
+    }
+
+    .hero {
+        padding: 2.5rem 1.2rem;
+        margin: 0.8rem 0;
+        border-radius: 16px;
+    }
+
+    .hero h2 {
+        font-size: 1.8rem;
+    }
+
+    .hero p {
+        font-size: 0.95rem;
+    }
+
+    .posts {
+        gap: 1.2rem;
+        margin: 1.2rem 0;
+    }
+
+    .post-card {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+
+    .post-card h3 {
+        font-size: 1.2rem;
+    }
+
+    .article {
+        padding: 2rem 1.5rem;
+        margin: 0.8rem;
+        border-radius: 16px;
+    }
+
+    .article h1 {
+        font-size: 1.8rem;
+    }
+
+    .article-content h2 {
+        font-size: 1.4rem;
+    }
+
+    .article-content h3 {
+        font-size: 1.2rem;
     }
 }
 
