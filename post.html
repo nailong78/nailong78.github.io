@@ -41,22 +41,7 @@
     <script>
         // 页面加载完成后初始化博客
         window.addEventListener('DOMContentLoaded', async function() {
-            const postManager = new PostManager();
-            const urlParams = new URLSearchParams(window.location.search);
-            const slug = urlParams.get('slug');
-            
-            if (slug) {
-                const post = await postManager.getPostBySlug(slug);
-                const postContainer = document.querySelector('.post-container');
-                if (postContainer) {
-                    postContainer.innerHTML = postManager.generatePostHTML(post);
-                }
-            } else {
-                const postContainer = document.querySelector('.post-container');
-                if (postContainer) {
-                    postContainer.innerHTML = '<p>文章不存在</p>';
-                }
-            }
+            await initBlog();
         });
     </script>
     <style>

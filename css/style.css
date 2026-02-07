@@ -41,26 +41,38 @@ body {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    position: sticky;
-    top: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
-    padding: 1rem 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 0.8rem 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border-radius: 20px 20px 0 0;
+    margin: 0 1rem;
+    max-width: calc(100% - 2rem);
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 1rem;
 }
 
 .logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    text-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);
+    display: none;
+}
+
+.nav-menu {
+    width: 100%;
 }
 
 .nav-menu ul {
     display: flex;
     list-style: none;
-    gap: 2rem;
+    gap: 1rem;
+    justify-content: space-around;
+    width: 100%;
+    padding: 0 1rem;
 }
 
 .nav-menu a {
@@ -69,10 +81,13 @@ body {
     font-weight: 500;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
-    padding: 0.5rem 0;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    display: inline-block;
 }
 
 .nav-menu a:hover {
+    background: rgba(0, 122, 255, 0.1);
     color: var(--primary-color);
     transform: translateY(-2px);
 }
@@ -358,6 +373,11 @@ body {
 .article-content li {
     margin-bottom: 0.8rem;
     line-height: 1.6;
+}
+
+/* 主内容区域底部边距 */
+main {
+    padding-bottom: 100px; /* 为底部导航栏留出空间 */
 }
 
 /* 页脚样式 */
